@@ -6,3 +6,5 @@ Protótipo clicável do MAPERE: mostra se um eletroposto está livre e funcionan
 - Status, preços, vagas, relatos e vantagens: **simulados**.
 - Site estático (HTML/CSS/JS). Mapa: OpenStreetMap + Leaflet.
 - Publicação: Vercel (cada push na `main` publica em produção).
+
+Endereço: https://mapere-aracaju.vercel.app
