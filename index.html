@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MAPERE – Protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css">
+<style>
+:root{
+  --bg:#f4f6f8; --card:#fff; --ink:#0f1b2d; --muted:#667085; --line:#e4e7ec;
+  --brand:#0b7a5b; --brand-d:#075c44; --green:#16a34a; --red:#dc2626; --gray:#6b7280; --amber:#d97706; --blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#dfe5ea;color:var(--ink);display:flex;justify-content:center}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+#app{position:relative;width:100%;max-width:430px;height:100dvh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,.18)}
+header{background:var(--brand);color:#fff;padding:10px 14px 10px;display:flex;align-items:center;gap:10px;z-index:500}
+header h1{font-size:18px;letter-spacing:.5px;flex:1}
+header h1 small{display:block;font-size:11px;font-weight:400;opacity:.85;letter-spacing:0}
+.pts{background:rgba(255,255,255,.18);padding:5px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.iconbtn{background:rgba(255,255,255,.18);width:34px;height:34px;border-radius:50%;font-size:16px}
+.demo{background:#fff7e0;color:#7a5a00;font-size:11px;text-align:center;padding:4px 8px;border-bottom:1px solid #f0e2b0}
+.chips{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;font-size:13px}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+main{flex:1;position:relative;min-height:0}
+.view{position:absolute;inset:0;display:none;flex-direction:column}
+.view.active{display:flex}
+#map{flex:1;min-height:0}
+.sheet{background:var(--card);border-radius:18px 18px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.14);display:flex;flex-direction:column;height:34%;transition:height .25s;z-index:400;position:relative}
+.sheet.big{height:82%}
+.handle{padding:8px;text-align:center;cursor:pointer}
+.handle i{display:block;width:40px;height:4px;border-radius:9px;background:#cdd2d9;margin:0 auto 6px}
+.handle span{font-size:12px;color:var(--muted)}
+.list{overflow-y:auto;padding:0 12px 12px;flex:1}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;cursor:pointer}
+.card:active{background:#f8fafb}
+.row{display:flex;align-items:center;gap:8px}
+.row.sp{justify-content:space-between}
+.card h3{font-size:15px}
+.sub{font-size:12px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;color:#fff}
+.b-available{background:var(--green)}.b-occupied{background:var(--red)}.b-offline{background:var(--gray)}
+.tag{display:inline-block;font-size:11px;background:#eef2f6;border-radius:6px;padding:2px 7px;margin:6px 4px 0 0}
+.tag.gift{background:#fff1d6;color:#8a5a00}
+.tag.ok{background:#dcfce7;color:#14532d}
+.tag.warn{background:#fee2e2;color:#7f1d1d}
+.fresh{font-size:12px;margin-top:6px;display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.f-new{color:#15803d}.f-mid{color:#b45309}.f-old{color:#b91c1c}
+.empty{text-align:center;padding:26px 10px;color:var(--muted)}
+.btn{background:var(--brand);color:#fff;padding:12px 14px;border-radius:12px;font-weight:600;width:100%}
+.btn.sec{background:#eaf5f1;color:var(--brand-d)}
+.btn.ghost{background:#f1f3f5;color:var(--ink)}
+.btn.red{background:#fee2e2;color:#991b1b}
+.btn.sm{padding:8px 12px;width:auto;font-size:13px;border-radius:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+nav{display:flex;background:#fff;border-top:1px solid var(--line);z-index:600}
+nav button{flex:1;padding:9px 0 8px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button b{font-size:19px;font-weight:400}
+nav button.on{color:var(--brand);font-weight:700}
+.page{overflow-y:auto;padding:14px;flex:1}
+.page h2{font-size:18px;margin-bottom:4px}
+.modal{position:absolute;inset:0;background:rgba(15,27,45,.5);z-index:1000;display:none;align-items:flex-end}
+.modal.show{display:flex}
+.panel{background:#fff;width:100%;max-height:90%;overflow-y:auto;border-radius:20px 20px 0 0;padding:16px;animation:up .22s}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.panel h2{font-size:18px}
+.panel h4{font-size:13px;margin:14px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.x{float:right;font-size:20px;color:var(--muted);padding:0 4px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.suggest{background:#fff7e0;border:1px solid #f3e1a5;border-radius:12px;padding:10px;margin-top:12px;font-size:14px}
+.choice{display:flex;gap:8px;margin:8px 0}
+.choice button{flex:1;padding:14px 4px;border-radius:12px;border:2px solid var(--line);font-weight:600;font-size:14px}
+.opts label{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;font-size:14px}
+.sw{position:relative;width:46px;height:26px;background:#cbd2d9;border-radius:99px;flex:none;transition:.2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:.2s}
+.sw.on{background:var(--brand)}.sw.on::after{left:23px}
+#login{position:absolute;inset:0;z-index:3000;background:linear-gradient(170deg,#075c44 0%,#0b7a5b 55%,#12a37a 100%);color:#fff;display:flex;flex-direction:column;overflow-y:auto;padding:28px 22px 22px}
+#login.hide{display:none}
+.logo{text-align:center;margin:18px 0 22px}
+.logo b{display:block;font-size:38px;letter-spacing:1px}
+.logo span{font-size:14px;opacity:.9}
+.lcard{background:#fff;color:var(--ink);border-radius:20px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.seg{display:flex;background:#eef1f4;border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;padding:10px 6px;border-radius:11px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--brand-d);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.rdesc{font-size:13px;color:var(--muted);margin-bottom:12px;min-height:34px}
+.fld{display:block;margin-bottom:10px}
+.fld span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.fld input{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font:inherit}
+.fld input:focus{outline:2px solid var(--brand);border-color:transparent}
+.lnk{color:var(--brand-d);font-size:13px;font-weight:600;text-align:center;display:block;width:100%;margin-top:12px}
+.lfoot{margin-top:auto;padding-top:18px;text-align:center;font-size:11px;opacity:.85}
+#owner{position:absolute;inset:0;z-index:900;background:var(--bg);display:none;flex-direction:column}
+#owner.show{display:flex}
+.oh{background:#12324a;color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px}
+.oh h1{flex:1;font-size:16px}.oh h1 small{display:block;font-size:11px;font-weight:400;opacity:.8}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.kpi b{font-size:22px;display:block}.kpi span{font-size:12px;color:var(--muted)}
+.alert{background:#fee2e2;border:1px solid #fecaca;color:#7f1d1d;border-radius:10px;padding:8px 10px;font-size:13px;margin-top:8px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:34px;height:34px;border-radius:10px;background:#eef1f4;font-size:18px;font-weight:700}
+.owner-in{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;margin-top:4px}
+.lbl{font-size:12px;color:var(--muted);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.4px}
+#toast{position:absolute;left:12px;right:12px;top:64px;background:#0f1b2d;color:#fff;padding:12px 14px;border-radius:12px;font-size:14px;z-index:4000;opacity:0;transform:translateY(-10px);transition:.25s;pointer-events:none}
+#toast.show{opacity:1;transform:none}
+.coupon{border:1px dashed #d4a017;background:#fffbea;border-radius:14px;padding:12px;margin-bottom:10px}
+.coupon .code{font-family:ui-monospace,monospace;font-weight:700;letter-spacing:1px;background:#fff;border:1px solid #eadca0;border-radius:8px;padding:6px 10px;display:inline-block;margin-top:8px}
+.bar{height:8px;background:#e4e7ec;border-radius:9px;overflow:hidden;margin:8px 0 4px}
+.bar i{display:block;height:100%;background:var(--brand)}
+.pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.pin span{transform:rotate(45deg);color:#fff;font-size:15px;font-weight:700}
+.pin.stale{opacity:.55}
+.me{width:18px;height:18px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,.5);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 16px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.legend{position:absolute;right:10px;top:10px;background:#fff;border-radius:10px;padding:6px 9px;font-size:11px;z-index:450;box-shadow:0 2px 8px rgba(0,0,0,.2);line-height:1.5}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+.hint{position:absolute;left:10px;top:10px;background:rgba(255,255,255,.92);border-radius:10px;padding:5px 9px;font-size:11px;z-index:450;box-shadow:0 2px 8px rgba(0,0,0,.2);max-width:55%}
+
+/* busca e ferramentas do mapa */
+.searchbar{position:absolute;left:10px;right:10px;top:10px;z-index:460;background:#fff;border-radius:16px;box-shadow:0 6px 20px rgba(16,40,64,.22);display:flex;align-items:center;gap:8px;padding:4px 6px 4px 14px;color:#667085}
+.searchbar input{flex:1;border:0;outline:0;font:inherit;font-size:14px;padding:11px 0;background:none;color:var(--ink);min-width:0}
+.searchbar button{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:var(--brand);background:var(--brand-l)}
+.maptools{position:absolute;right:10px;bottom:14px;z-index:450;display:flex;flex-direction:column;gap:8px}
+.maptools button{width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(16,40,64,.22);display:grid;place-items:center;color:#33415a}
+.maptools button:active{transform:scale(.94)}
+.legend{top:64px!important}
+.leaflet-control-zoom{display:none}
+.leaflet-tooltip{border-radius:10px;border:0;box-shadow:0 4px 14px rgba(16,40,64,.25);font-weight:600;font-size:12px;padding:5px 9px}
+
+/* clusters */
+.clu{width:40px;height:40px;border-radius:50%;background:var(--grad);color:#fff;font-weight:800;font-size:14px;display:grid;place-items:center;border:3px solid #fff;box-shadow:0 4px 14px rgba(6,97,74,.45)}
+
+/* ===================== v2 · VISUAL REFINADO ===================== */
+:root{--brand:#0a8f6a;--brand-d:#06614a;--brand-l:#e6f6f0;--ink:#0b1a2b;--muted:#6b7686;--line:#e8ecf1;
+  --shadow:0 6px 20px rgba(16,40,64,.08);--shadow-s:0 2px 8px rgba(16,40,64,.06);--grad:linear-gradient(135deg,#12b98b 0%,#08755a 100%)}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(1100px 600px at 15% -10%,#bfeadb 0,transparent 60%),radial-gradient(900px 500px at 105% 110%,#c6dcf2 0,transparent 55%),#e9eef3}
+svg{display:block;flex:none}
+@media(min-width:520px){
+  body{align-items:center}
+  #app{height:min(900px,calc(100dvh - 32px));border-radius:34px;box-shadow:0 30px 80px rgba(16,40,64,.3),0 0 0 9px #0b1a2b}
+}
+.list,.page,.panel,.chips{scrollbar-width:thin}
+/* header */
+header{background:var(--grad);padding:14px 16px 12px;box-shadow:0 4px 18px rgba(6,97,74,.35);gap:10px}
+header h1{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;letter-spacing:1.5px;line-height:1.1}
+header h1 small{font-size:11px;font-weight:500;letter-spacing:0;opacity:.88;margin-top:2px}
+.mark{width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}
+.pts{background:rgba(255,255,255,.2);padding:6px 11px;font-weight:700;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)}
+.iconbtn{display:grid;place-items:center;width:38px;height:38px;background:rgba(255,255,255,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);transition:.15s}
+.iconbtn:active{transform:scale(.92)}
+.demo{background:#fff8e6;color:#8a6200;font-weight:500;padding:5px 8px}
+/* chips */
+.chips{padding:10px 14px;gap:8px;border-bottom:0;box-shadow:var(--shadow-s);position:relative;z-index:2}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;font-weight:600;font-size:13px;color:#33415a;box-shadow:var(--shadow-s);transition:.15s}
+.chip.on{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(10,143,106,.35)}
+.chip:active{transform:scale(.96)}
+/* mapa */
+.legend,.hint{background:rgba(255,255,255,.95);border-radius:14px;box-shadow:var(--shadow);font-weight:600;color:#33415a;padding:8px 11px;backdrop-filter:blur(6px)}
+.hint{display:flex;align-items:center;gap:6px}
+.pin{width:36px;height:36px}
+.pin span{display:flex}
+/* sheet + cards */
+.sheet{border-radius:28px 28px 0 0;box-shadow:0 -10px 30px rgba(16,40,64,.18)}
+.handle i{width:44px;height:5px}
+.handle span{font-weight:600;color:#4a566a}
+.card{border:0;border-left:5px solid var(--line);border-radius:18px;padding:14px 14px 12px;box-shadow:var(--shadow);transition:.15s}
+.card:active{transform:scale(.99)}
+.card[data-s=available]{border-left-color:var(--green)}
+.card[data-s=occupied]{border-left-color:var(--red)}
+.card[data-s=offline]{border-left-color:var(--gray)}
+.card h3{font-size:15.5px;font-weight:700}
+.badge{padding:4px 10px 4px 8px;font-size:11.5px;letter-spacing:.2px}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff}
+.tag{background:#f0f3f7;color:#3b4859;border-radius:8px;padding:4px 8px;font-weight:600;font-size:11px}
+.tag.gift{background:#fff1d6;color:#8a5a00}.tag.ok{background:#dcfce7;color:#14532d}.tag.warn{background:#fee2e2;color:#7f1d1d}
+.fresh{background:#f6f8fa;border-radius:10px;padding:7px 10px;font-size:11.5px;font-weight:500}
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--grad);border-radius:14px;padding:14px;font-weight:700;box-shadow:0 8px 18px rgba(10,143,106,.3);transition:.15s}
+.btn:active{transform:translateY(1px) scale(.99);box-shadow:0 3px 8px rgba(10,143,106,.3)}
+.btn.sec{background:var(--brand-l);color:var(--brand-d);box-shadow:none}
+.btn.ghost{background:#eef2f6;color:var(--ink);box-shadow:none}
+.btn.red{background:#fdecec;color:#b42318;box-shadow:none}
+.btn[disabled]{opacity:.45;box-shadow:none;cursor:not-allowed}
+.btn.sm{padding:9px 14px;border-radius:12px}
+.btn small{opacity:.75;font-weight:600}
+/* modais */
+.modal{background:rgba(11,26,43,.45);backdrop-filter:blur(3px)}
+.panel{border-radius:28px 28px 0 0;padding:20px 18px 24px}
+.panel h2{font-size:20px;font-weight:800}
+.panel h4{font-size:11.5px;letter-spacing:.8px;margin:18px 0 8px}
+.x{width:32px;height:32px;border-radius:50%;background:#eef2f6;display:grid;place-items:center;color:#4a566a}
+.choice button{background:#fff;border-radius:14px;box-shadow:var(--shadow-s);transition:.15s}
+.choice button:active{transform:scale(.97)}
+.opts label{border-radius:14px;padding:12px;font-weight:500;transition:.15s;cursor:pointer}
+.opts label:active{background:#f6f8fa}
+.suggest{background:linear-gradient(135deg,#fffaea,#fff2cc);border:1px solid #f1dc94;border-radius:16px;padding:12px}
+.coupon{background:linear-gradient(135deg,#fffaea,#fff1c9);border:1.5px dashed #e0b84a;border-radius:18px}
+.kv{font-size:14px;background:#f6f8fa;border-radius:14px;padding:12px}
+/* nav */
+nav{padding:6px 8px calc(6px + env(safe-area-inset-bottom));border-top:0;box-shadow:0 -4px 20px rgba(16,40,64,.07)}
+nav button{padding:6px 0;font-weight:600;gap:3px}
+nav button b{display:grid;place-items:center;width:52px;height:30px;border-radius:99px;transition:.2s}
+nav button.on b{background:var(--brand-l);color:var(--brand)}
+/* login */
+#login{background:radial-gradient(500px 300px at 95% 0,rgba(255,255,255,.2),transparent 60%),radial-gradient(420px 420px at 0 100%,rgba(0,0,0,.25),transparent 60%),linear-gradient(165deg,#064e3b 0%,#0a8f6a 60%,#18c79b 100%)}
+.logo b{font-size:30px;font-weight:800;letter-spacing:3px}
+.lm{width:72px;height:72px;border-radius:24px;background:rgba(255,255,255,.18);display:grid;place-items:center;margin:0 auto 14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.35),0 10px 30px rgba(0,0,0,.18)}
+.lcard{border-radius:28px;padding:20px;box-shadow:0 24px 50px rgba(0,0,0,.3)}
+.seg{background:#eef2f6;border-radius:16px}
+.seg button{display:flex;align-items:center;justify-content:center;gap:7px;padding:11px 6px;transition:.15s}
+.seg button.on{box-shadow:0 2px 8px rgba(16,40,64,.15)}
+.fld input{border-radius:14px;padding:14px;background:#f8fafc;border:1.5px solid var(--line)}
+.fld input:focus{background:#fff;outline:0;border-color:var(--brand);box-shadow:0 0 0 4px rgba(10,143,106,.15)}
+.lnk{padding:6px}
+/* dono */
+.oh{background:linear-gradient(135deg,#17405c,#0c2234);padding:14px 16px;gap:10px}
+.oh h1{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
+.kpi{border:0;border-radius:18px;box-shadow:var(--shadow);padding:14px}
+.kpi b{font-size:24px;font-weight:800;margin-top:6px}
+.kpi .ki{width:30px;height:30px;border-radius:10px;background:var(--brand-l);color:var(--brand);display:grid;place-items:center}
+.stepper{background:#f6f8fa;border-radius:14px;padding:6px;justify-content:space-between}
+.stepper button{background:#fff;box-shadow:var(--shadow-s);transition:.15s}
+.stepper button:active{transform:scale(.92)}
+.owner-in{border-radius:12px;background:#f8fafc;border:1.5px solid var(--line)}
+.alert{border-radius:12px}
+.page h2{font-weight:800}
+#toast{border-radius:16px;box-shadow:0 12px 30px rgba(11,26,43,.35);font-weight:500}
+
+/* ===================== v3 · NOVO DESIGN (telas da outra IA, paleta verde) ===================== */
+.modal{z-index:3600}
+.mark svg,.lm svg{filter:none}
+/* página cheia (detalhe / avaliar) */
+#pg{position:absolute;inset:0;z-index:700;background:var(--bg);display:none;flex-direction:column}
+#pg.show{display:flex}
+.pgh{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#fff;box-shadow:0 1px 10px rgba(16,40,64,.07);position:relative;z-index:2}
+.pgb{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;color:var(--ink);transition:.15s}
+.pgb:active{background:#eef2f6}
+.pgt{flex:1;font-weight:800;font-size:17px;letter-spacing:-.2px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center}
+.pgbody{flex:1;overflow-y:auto;padding:12px 16px 26px;display:flex;flex-direction:column;gap:14px}
+.pgfoot{padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;box-shadow:0 -6px 20px rgba(16,40,64,.08);display:none}
+.pgfoot .note{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.4}
+.strip{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.chipx{display:inline-flex;align-items:center;gap:6px;background:#fff;border-radius:99px;padding:7px 12px;font-size:12px;font-weight:700;box-shadow:var(--shadow-s);color:var(--brand-d)}
+.rbtn{width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:var(--shadow-s);display:grid;place-items:center;color:#3d6280;transition:.15s}
+.rbtn:active{transform:scale(.92)}
+.rbtn.on{background:var(--brand-l);color:var(--brand)}
+.hero{position:relative;border-radius:22px;overflow:hidden;height:168px;color:#fff;padding:14px;display:flex;flex-direction:column;justify-content:space-between;
+  background:radial-gradient(260px 160px at 90% 0,rgba(255,255,255,.22),transparent 60%),linear-gradient(150deg,#0c2234 0%,#0f4f45 55%,#12a37a 100%);box-shadow:var(--shadow)}
+.hero svg.bgart{position:absolute;inset:0;width:100%;height:100%;opacity:.25}
+.hero .tag2{align-self:flex-start;background:#8af7cb;color:#002116;font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;padding:5px 10px;border-radius:99px;position:relative}
+.hero .bot{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;position:relative}
+.hero small{display:block;font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;opacity:.85;font-weight:700}
+.hero b{font-size:18px;line-height:1.2;font-weight:800;display:block;margin-top:2px}
+.pwr{background:rgba(255,255,255,.94);color:var(--ink);border-radius:14px;padding:7px 11px;text-align:center;flex:none}
+.pwr b{color:var(--brand);font-size:18px;margin:0;line-height:1.1}
+.pwr span{font-size:10px;color:var(--muted);font-weight:700}
+.dtitle{font-size:20px;font-weight:800;letter-spacing:-.3px;line-height:1.25}
+.daddr{display:flex;gap:6px;color:var(--muted);font-size:13px;margin-top:4px}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.spill{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:99px;font-size:12px;font-weight:800;letter-spacing:.4px}
+.spill i{width:9px;height:9px;border-radius:50%;background:currentColor}
+.spill.available{background:#dcf5ea;color:#067a57}.spill.available i{animation:pulse2 1.6s infinite}
+.spill.occupied{background:#fee2e2;color:#b42318}
+.spill.offline{background:#eceff3;color:#475467}
+.spill.dist{background:#dbeafe;color:#1e4fb8}
+@keyframes pulse2{50%{opacity:.35}}
+.fbanner{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:var(--shadow-s)}
+.fbanner b{display:block;font-size:15px;font-weight:800}
+.fbanner span{font-size:12px;color:var(--muted)}
+.altbox{display:flex;gap:12px;background:#e8f1fb;border-radius:16px;padding:13px;color:#234a67}
+.altbox .ai{width:34px;height:34px;border-radius:11px;background:#fff;display:grid;place-items:center;flex:none;color:#3d6280}
+.altbox small{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;font-weight:800;color:#3d6280}
+.altbox p{font-size:13px;margin-top:3px;line-height:1.4;color:var(--ink)}
+.altbox button{margin-top:8px}
+.ck{background:#fff;border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.ck h3,.sech h3{font-size:16px;font-weight:800;display:flex;align-items:center;gap:7px}
+.ck .pts2{background:#8af7cb;color:#002116;font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px}
+.ck p.sub{margin:4px 0 12px}
+.ck3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ck3 button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;border-radius:16px;background:#f3f6fa;transition:.15s;border:2px solid transparent}
+.ck3 button:active{transform:scale(.96)}
+.ck3 .ci{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;margin-bottom:2px}
+.ck3 b{font-size:12px;letter-spacing:.5px}
+.ck3 small{font-size:10px;color:var(--muted)}
+.ck3 .l .ci{background:#dcf5ea;color:#067a57}.ck3 .o .ci{background:#fee2e2;color:#b42318}.ck3 .d .ci{background:#e2e5ea;color:#475467}
+.perk{display:flex;gap:12px;align-items:center;background:linear-gradient(135deg,#fffaea,#fff1c9);border:1px solid #f1dc94;border-radius:18px;padding:13px}
+.perk .pi{width:46px;height:46px;border-radius:14px;background:#fff;display:grid;place-items:center;color:var(--brand);flex:none}
+.perk small{display:inline-block;background:#fff;border-radius:99px;padding:2px 9px;font-size:10px;font-weight:800;color:#8a5a00}
+.perk b{display:block;margin-top:3px;font-size:15px}
+.perk p{font-size:12px;color:var(--muted);line-height:1.35}
+.sech{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sech .lk{font-size:12px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.5px}
+.box2{background:#fff;border-radius:18px;padding:14px;box-shadow:var(--shadow-s);display:flex;flex-direction:column;gap:12px}
+.crow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.crow .ci2{width:38px;height:38px;border-radius:12px;background:var(--brand-l);color:var(--brand);display:grid;place-items:center;flex:none}
+.crow .ct{flex:1;min-width:0}
+.crow .ct b{font-size:14.5px;display:block}
+.crow .ct span{font-size:12px;color:var(--muted)}
+.hr{height:1px;background:#eef1f5}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.qg div{background:#fff;border-radius:16px;padding:12px;box-shadow:var(--shadow-s)}
+.qg small{display:flex;gap:6px;align-items:center;color:#3d6280;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.qg b{display:block;font-size:14.5px}
+.qg span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.rel{display:flex;gap:10px}
+.rel .av{width:34px;height:34px;border-radius:50%;background:var(--brand-l);color:var(--brand-d);display:grid;place-items:center;font-weight:800;font-size:12px;flex:none}
+.rel .rt{flex:1;min-width:0}
+.rel .rt div{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.rel .rt div b{font-size:12.5px}
+.rel .rt div i{font-style:normal;color:#98a2b3}
+.rel p{font-size:13px;color:#475467;margin-top:2px;line-height:1.4}
+.rel .stars{display:flex;gap:1px;margin-top:3px;color:#f59e0b}
+.simtag{font-size:10px;font-weight:700;background:#eef1f5;color:#667085;border-radius:6px;padding:2px 6px;margin-left:6px;text-transform:none;letter-spacing:0}
+.rowbtn{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:#fff;border-radius:16px;padding:13px 14px;box-shadow:var(--shadow-s);font-weight:700;font-size:14px;text-align:left}
+.rowbtn .l2{display:flex;align-items:center;gap:9px}
+.rowbtn.soft{background:#f3f6fa;box-shadow:none;font-size:13px}
+.rowbtn em{font-style:normal;font-size:11px;font-weight:800;background:#e8f1fb;color:#234a67;border-radius:8px;padding:3px 8px}
+.rowbtn em.on{background:var(--brand-l);color:var(--brand-d)}
+.reportlk{display:flex;align-items:center;justify-content:center;gap:6px;color:#b42318;font-size:13px;font-weight:600;padding:8px;width:100%}
+.simnote{font-size:11px;color:var(--muted);text-align:center}
+/* avaliar */
+.sthead{display:flex;gap:12px;align-items:center}
+.sthead .ib{width:56px;height:56px;border-radius:18px;background:#0c2234;color:#fff;display:grid;place-items:center;flex:none}
+.sthead b{font-size:18px;font-weight:800;display:block;letter-spacing:-.2px}
+.sthead span{font-size:13px;color:var(--muted)}
+.qh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.qh h3{font-size:17px;font-weight:800}
+.qh span{font-size:12px;color:var(--muted);font-weight:600}
+.sb3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sb3 button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 4px;border-radius:16px;background:#fff;border:2px solid var(--line);font-weight:700;font-size:14px;transition:.15s}
+.sb3 button.sel.available{background:#dcf5ea;border-color:#067a57}
+.sb3 button.sel.occupied{background:#fee9d2;border-color:#d97706}
+.sb3 button.sel.offline{background:#fee2e2;border-color:#dc2626}
+.stars2{display:flex;align-items:center;gap:6px}
+.stars2 button{color:#cbd2d9;transition:.15s}
+.stars2 button.on{color:#f59e0b}
+.stars2 button:active{transform:scale(.85)}
+.stars2 span{margin-left:10px;font-weight:700;color:#475467}
+.tags2{display:flex;flex-wrap:wrap;gap:8px}
+.tags2 button{padding:9px 14px;border-radius:99px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:13.5px;transition:.15s}
+.tags2 button.on{background:var(--brand-l);border-color:var(--brand);color:var(--brand-d)}
+.photo{display:flex;align-items:center;justify-content:center;gap:9px;border:2px dashed #cbd2d9;border-radius:16px;padding:30px 10px;color:var(--brand);font-weight:700;width:100%;background:#fff}
+.photo img{max-height:150px;border-radius:12px}
+.hint2{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.4}
+textarea.cm{width:100%;min-height:96px;border:1.5px solid var(--line);border-radius:16px;padding:12px;font:inherit;font-size:14px;resize:vertical;background:#fff}
+textarea.cm:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 4px rgba(10,143,106,.14)}
+.rad{display:flex;align-items:center;justify-content:space-between;padding:13px;border-radius:14px;background:#f3f6fa;margin-bottom:8px;cursor:pointer;border:2px solid transparent}
+.rad.on{border-color:var(--brand);background:var(--brand-l)}
+.rad b{color:var(--brand-d)}
+/* login v3 */
+#login{background:var(--bg);color:var(--ink);padding:0}
+.lhero{position:relative;background:radial-gradient(420px 260px at 85% 0,rgba(255,255,255,.14),transparent 60%),linear-gradient(160deg,#052e26 0%,#08755a 100%);height:210px;flex:none;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;border-radius:0 0 32px 32px}
+.lhero .lg{display:flex;align-items:center;gap:10px;font-size:34px;font-weight:800;letter-spacing:2px}
+.lhero p{font-size:15px;opacity:.9}
+.lhero .dp{position:absolute}
+.lbody{padding:20px 20px 14px;flex:1;display:flex;flex-direction:column}
+.lbody h2{font-size:26px;font-weight:800;margin-bottom:12px}
+.lbody .seg{margin-bottom:10px}
+.lbody .fld span{color:var(--ink);font-weight:700;font-size:13px}
+.lbody .fld input{background:#fff}
+.pw{position:relative}
+.pw input{padding-right:46px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;color:#475467}
+.lk2{align-self:flex-end;color:var(--brand-d);font-weight:700;font-size:13.5px;margin:-2px 0 12px}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;margin:14px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.btn.out{background:#fff;color:var(--ink);box-shadow:none;border:1.5px solid var(--line)}
+.lbot{margin-top:auto;padding-top:18px;text-align:center;font-size:14px;color:#475467;display:flex;flex-direction:column;gap:12px}
+.lbot b{color:var(--brand-d);font-weight:800}
+/* boas-vindas */
+#welcome{position:absolute;inset:0;z-index:3500;background:#052e26;display:flex;flex-direction:column}
+#welcome.hide{display:none}
+.whero{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(500px 300px at 90% -10%,rgba(18,185,139,.35),transparent 60%),linear-gradient(170deg,#06231d 0%,#0a3b30 100%)}
+.whero svg.wart{position:absolute;inset:0;width:100%;height:100%}
+.wlogo{position:absolute;left:22px;top:calc(22px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;color:#fff;font-size:24px;font-weight:800;letter-spacing:1.5px}
+.wp{position:absolute}
+.wcard{position:absolute;left:30%;top:34%;background:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 12px 30px rgba(0,0,0,.35);font-size:12px;color:var(--muted)}
+.wcard b{display:flex;align-items:center;gap:7px;color:#067a57;font-size:15px}
+.wcard b i{width:9px;height:9px;border-radius:50%;background:#16a34a}
+.wsheet{background:#fff;border-radius:30px 30px 0 0;padding:24px 22px calc(18px + env(safe-area-inset-bottom,0px));flex:none;margin-top:-26px;position:relative;color:var(--ink)}
+.wsheet h2{font-size:28px;line-height:1.1;font-weight:800;letter-spacing:-.6px;text-wrap:balance}
+.wsheet p{color:#475467;margin:10px 0 18px;font-size:15px;line-height:1.45}
+.wsheet .btn{margin-bottom:10px}
+.wlinks{display:flex;justify-content:space-between;margin:6px 2px 14px;font-weight:700}
+.wlinks .a{color:var(--brand-d)}.wlinks .b{color:#667085}
+.wterms{font-size:12px;color:#667085;line-height:1.4}
+.wterms u{color:var(--brand-d)}
+.mark svg{width:auto;height:auto}
+.pgbody>*{flex:none}
+.leaflet-container{z-index:0}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1><span class="mark" data-ic="logo" data-s="22"></span><span>MAPERE<small>Eletropostos em Aracaju · agora</small></span></h1>
+    <span class="pts" id="ptsTop">★ 0</span>
+    <button class="iconbtn" id="btnFilter" aria-label="Filtros" data-ic="sliders" data-s="18"></button>
+  </header>
+  <div class="demo">Locais reais de Aracaju · status, preços e vantagens simulados.</div>
+  <div class="chips" id="chips"></div>
+
+  <main>
+    <section class="view active" id="v-explore">
+      <div style="position:relative;flex:1;min-height:0;display:flex">
+        <div id="map"></div>
+        <div class="searchbar">
+          <span data-ic="search" data-s="18"></span>
+          <input id="q" placeholder="Buscar endereço ou bairro em Aracaju" autocomplete="off">
+          <button id="locate" title="Minha localização" data-ic="crosshair" data-s="19"></button>
+        </div>
+        <div class="maptools">
+          <button id="layerBtn" title="Mapa / Satélite" data-ic="layers" data-s="19"></button>
+          <button id="fitBtn" title="Ver todos os postos" data-ic="map" data-s="19"></button>
+        </div>
+        <div class="legend"><i style="background:var(--green)"></i>Livre<br><i style="background:var(--red)"></i>Ocupado<br><i style="background:var(--gray)"></i>Fora do ar</div>
+      </div>
+      <div class="sheet" id="sheet">
+        <div class="handle" id="handle"><i></i><span id="count"></span></div>
+        <div class="list" id="list"></div>
+      </div>
+    </section>
+
+    <section class="view" id="v-perks"><div class="page" id="perks"></div></section>
+    <section class="view" id="v-car"><div class="page" id="car"></div></section>
+  </main>
+
+  <nav>
+    <button data-tab="explore" class="on"><b data-ic="map" data-s="22"></b>Explorar</button>
+    <button data-tab="perks"><b data-ic="gift" data-s="22"></b>Vantagens</button>
+    <button data-tab="car"><b data-ic="car" data-s="22"></b>Meu carro</button>
+  </nav>
+
+  <section id="owner">
+    <div class="oh"><h1><span class="mark" data-ic="plug" data-s="20"></span><span>Painel do Dono<small id="ownName"></small></span></h1>
+      <button class="iconbtn" id="ownPreview" title="Ver como motorista" data-ic="eye" data-s="18"></button>
+      <button class="iconbtn" id="ownOut" title="Sair" data-ic="power" data-s="18"></button></div>
+    <div class="demo">Protótipo com dados simulados — alterações aparecem no app do motorista.</div>
+    <div class="page" id="ownBody"></div>
+  </section>
+
+  <section id="pg">
+    <div class="pgh"><button class="pgb" id="pgBack" aria-label="Voltar" data-ic="back" data-s="22"></button><div class="pgt" id="pgTitle"></div><span class="avatar" data-ic="user" data-s="17"></span></div>
+    <div class="pgbody" id="pgBody"></div>
+    <div class="pgfoot" id="pgFoot"></div>
+  </section>
+
+  <div class="modal" id="modal"><div class="panel" id="panel"></div></div>
+
+  <section id="login" class="hide">
+    <div class="lhero">
+      <span class="dp" style="left:8%;top:18%" data-pin="#16a34a" data-s="30"></span>
+      <span class="dp" style="right:9%;top:22%" data-pin="#f59e0b" data-s="34"></span>
+      <span class="dp" style="left:18%;bottom:20%" data-pin="#9aa3af" data-s="26"></span>
+      <span class="dp" style="right:22%;bottom:16%" data-pin="#16a34a" data-s="28"></span>
+      <div class="lg"><span data-ic="logo" data-s="40"></span>MAPERE</div>
+      <p>Postos livres perto de você</p>
+    </div>
+    <div class="lbody">
+      <h2 id="lTitle">Entrar</h2>
+      <div class="seg" id="roleSeg">
+        <button data-r="driver" class="on"><span data-ic="car" data-s="17"></span>Motorista</button>
+        <button data-r="owner"><span data-ic="plug" data-s="17"></span>Dono de posto</button>
+      </div>
+      <div class="rdesc" id="roleDesc"></div>
+      <label class="fld" id="fBiz" style="display:none"><span>Nome do estabelecimento</span><input id="inBiz" placeholder="Ex.: Rede Jardins Energia"></label>
+      <label class="fld"><span>E-mail</span><input id="inMail" type="email" autocomplete="off" placeholder="voce@email.com"></label>
+      <label class="fld"><span>Senha</span><div class="pw"><input id="inPass" type="password" autocomplete="off" placeholder="••••••••"><button id="eye" type="button" aria-label="Mostrar senha" data-ic="eye" data-s="19"></button></div></label>
+      <button class="lk2" id="btnForgot" type="button">Esqueci minha senha</button>
+      <button class="btn" id="btnLogin">Entrar</button>
+      <div class="or">ou</div>
+      <button class="btn out" id="btnGoogle"><span data-ic="google" data-s="18"></span>Continuar com Google</button>
+      <div class="lbot">
+        <div><span id="lAsk">Ainda não tem conta?</span> <button class="lnk" id="btnMode" style="display:inline;width:auto;margin:0"><b>Criar conta</b></button></div>
+        <button id="btnGuest" type="button">Ver o mapa sem entrar →</button>
+        <small style="color:#98a2b3">Protótipo: qualquer e-mail e senha funcionam. Não digite senhas reais.</small>
+      </div>
+    </div>
+  </section>
+
+  <section id="welcome">
+    <div class="whero">
+      <svg class="wart" viewBox="0 0 430 560" preserveAspectRatio="xMidYMid slice" fill="none" stroke="#17534a" stroke-width="22" stroke-linecap="round">
+        <path d="M-20 420 L450 300" /><path d="M-20 160 L450 60" stroke-width="16"/><path d="M130 600 L190 -20" stroke-width="26"/><path d="M360 600 L420 -20" stroke-width="14"/><path d="M-20 560 L260 330" stroke-width="12"/>
+        <rect x="250" y="250" width="110" height="80" rx="18" fill="#0d3f36" stroke="none"/>
+      </svg>
+      <div class="wlogo"><span data-ic="logo" data-s="34"></span>MAPERE</div>
+      <span class="wp" style="left:12%;top:26%" data-pin="#9aa3af" data-s="34"></span>
+      <span class="wp" style="right:14%;top:31%" data-pin="#f59e0b" data-s="38"></span>
+      <span class="wp" style="left:45%;top:54%" data-pin="#16a34a" data-s="54"></span>
+      <span class="wp" style="right:10%;top:68%" data-pin="#16a34a" data-s="32"></span>
+      <div class="wcard"><b><i></i>Livre · há 4 min</b>2 confirmações · 60 kW</div>
+      <span class="wp" style="left:20%;top:62%"><span class="me" style="display:block"></span></span>
+    </div>
+    <div class="wsheet">
+      <h2>Saiba se o posto está livre antes de sair</h2>
+      <p>Entre para confirmar status, avisar sobre defeito e receber alerta dos seus postos favoritos.</p>
+      <button class="btn" id="wPhone"><span data-ic="phone" data-s="18"></span>Entrar com celular</button>
+      <button class="btn out" id="wGoogle"><span data-ic="google" data-s="18"></span>Continuar com Google</button>
+      <div class="wlinks"><button class="a" id="wEmail">Usar e-mail</button><button class="b" id="wSkip">Agora não</button></div>
+      <div class="wterms">Ao continuar, você aceita os <u>Termos de uso</u> e a <u>Política de privacidade</u>.</div>
+    </div>
+  </section>
+  <div id="toast"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<script>
+/* ===================== DADOS SIMULADOS ===================== */
+const CENTER=[-10.9472,-37.0731];
+let user={lat:-10.9395,lng:-37.0580}; // Treze de Julho / Centro expandido
+
+const stations=[
+ {id:1,name:"Eletroposto Aperipê",addr:"R. Rafael de Aguiar, 375 – Pereira Lobo",lat:-10.9268,lng:-37.0711,approx:1,status:"available",age:4,conf:5,src:"Usuários",conn:["CCS2","Type 2"],kw:120,price:null,free:3,total:4,hours:"A confirmar",perk:{partner:"Parceiro (exemplo)",txt:"15% off em cafés"}},
+ {id:2,name:"Audi Center Aracaju (Enel X)",addr:"Av. Pres. Tancredo Neves, 1254 – Jardins",lat:-10.9509,lng:-37.0642,approx:1,status:"occupied",age:9,conf:3,src:"Operadora",conn:["CCS2"],kw:150,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+ {id:3,name:"Hiper Volt",addr:"R. Espírito Santo, 672 – Siqueira Campos",lat:-10.9240,lng:-37.0620,approx:1,status:"available",age:19,conf:2,src:"Usuários",conn:["CCS2"],kw:80,price:null,free:1,total:2,hours:"A confirmar",perk:null},
+ {id:4,name:"BR Super Carga – Marcondes Ferraz",addr:"R. Marcondes Ferraz, 210 – Jardins",lat:-10.9535,lng:-37.0543,approx:1,status:"available",age:6,conf:4,src:"Operadora",conn:["CCS2"],kw:60,price:null,free:2,total:2,hours:"A confirmar",perk:{partner:"Parceiro (exemplo)",txt:"Lavagem 20% off"}},
+ {id:5,name:"BR Super Carga – RioMar Shopping",addr:"Av. Delmiro Gouveia, 400 – Coroa do Meio",lat:-10.9454,lng:-37.0478,approx:0,status:"occupied",age:3,conf:6,src:"Usuários",conn:["CCS2"],kw:60,price:null,free:0,total:2,hours:"Horário do shopping",perk:{partner:"Parceiro (exemplo)",txt:"Ingresso 2x1 no cinema"}},
+ {id:6,name:"E-Volt SE",addr:"Av. Dr. José Tomaz D'Avila Nabuco, 945 – Farolândia",lat:-10.96965,lng:-37.06086,approx:1,status:"available",age:75,conf:1,src:"Usuários",conn:["CCS2","Type 2"],kw:50,price:null,free:2,total:3,hours:"A confirmar",perk:null},
+ {id:7,name:"Shopping Jardins",addr:"Av. Min. Geraldo Barreto Sobral, 215 – Jardins",lat:-10.9430,lng:-37.0595,approx:0,status:"available",age:2,conf:5,src:"Usuários",conn:["Type 2"],kw:7.5,price:null,free:1,total:2,hours:"Horário do shopping",perk:{partner:"Parceiro (exemplo)",txt:"R$ 5 off na praça de alimentação"}},
+ {id:8,name:"Pátio Jardim",addr:"Av. Hélio de Souza Leão, 669, Loja 17 – Jardins",lat:-10.95044,lng:-37.05818,approx:1,status:"available",age:28,conf:2,src:"Usuários",conn:["CCS2"],kw:47,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+ {id:9,name:"BYD – Terra Santa",addr:"R. Manoel Joaquim Correia, 40 – Grageru",lat:-10.9460,lng:-37.0641,approx:1,status:"occupied",age:12,conf:3,src:"Operadora",conn:["CCS2","Type 2"],kw:60,price:null,free:0,total:4,hours:"A confirmar",perk:null},
+ {id:10,name:"Assaí Atacadista",addr:"Av. Adélia Franco, 3735 – Grageru",lat:-10.94854,lng:-37.07172,approx:1,status:"available",age:35,conf:2,src:"Usuários",conn:["Type 2"],kw:7,price:null,free:2,total:2,hours:"Horário da loja",perk:null},
+ {id:11,name:"Pão de Açúcar – Jardins",addr:"R. José Seabra Batista, s/n – Jardins",lat:-10.94206,lng:-37.05676,approx:1,status:"offline",age:130,conf:1,src:"Usuários",conn:["Type 2"],kw:22,price:null,free:0,total:2,hours:"Horário da loja",perk:null},
+ {id:12,name:"Memorial de Sergipe – Orla de Atalaia",addr:"SE-100, 60 – Coroa do Meio / Atalaia",lat:-10.98557,lng:-37.04635,approx:1,status:"available",age:8,conf:3,src:"Usuários",conn:["CCS2"],kw:50,price:null,free:2,total:2,hours:"A confirmar",perk:{partner:"Parceiro (exemplo)",txt:"Água de coco grátis"}},
+ {id:13,name:"Maisvolt – Tancredo Neves",addr:"Av. Pres. Tancredo Neves, 3481 – Jabotiana",lat:-10.9290,lng:-37.0813,approx:1,status:"available",age:22,conf:2,src:"Usuários",conn:["CCS2"],kw:50,price:null,free:1,total:2,hours:"A confirmar",perk:null},
+ {id:14,name:"Volvo – Concessionária Stark",addr:"Av. Pres. Tancredo Neves, 3960 – Ponto Novo",lat:-10.9336,lng:-37.0826,approx:1,status:"offline",age:210,conf:2,src:"Operadora",conn:["Type 2"],kw:7,price:null,free:0,total:1,hours:"Horário da concessionária",perk:null},
+ {id:15,name:"Hotel Costa by Nobile",addr:"Av. Santos Dumont, 1807 – Coroa do Meio",lat:-10.9720,lng:-37.0367,approx:1,status:"available",age:41,conf:1,src:"Usuários",conn:["Type 2"],kw:7,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:16,name:"Posto Petrox",addr:"Av. Monteiro Lobato, 900 – Atalaia",lat:-10.98508,lng:-37.05541,approx:1,status:"offline",age:274,conf:1,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:17,name:"Petrox Beira Mar",addr:"Av. Gov. Paulo Barreto de Menezes, 662 – Farolândia",lat:-10.97042,lng:-37.05384,approx:1,status:"offline",age:191,conf:1,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:18,name:"Mix Mateus",addr:"Av. João Rodrigues, 592 – Industrial",lat:-10.89521,lng:-37.05127,approx:1,status:"available",age:30,conf:1,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:19,name:"Ibis Aracaju",addr:"Av. Adélia Franco, 2719 – Grageru",lat:-10.93943,lng:-37.06385,approx:1,status:"occupied",age:67,conf:3,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:20,name:"Biofit",addr:"Av. Mario Jorge Menezes Viêira, 2200 – Coroa do Meio",lat:-10.95882,lng:-37.04313,approx:1,status:"available",age:56,conf:2,src:"Usuários",conn:["Type 2","CCS2"],kw:null,price:null,free:1,total:2,hours:"A confirmar",perk:null},
+  {id:21,name:"CABM Mall",addr:"R. Monsenhor Olívio Teixeira, 1333 – Jardins",lat:-10.94756,lng:-37.05749,approx:1,status:"offline",age:173,conf:1,src:"Usuários",conn:["Type 2","Outro"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:22,name:"Village Mall Atalaia",addr:"Rua Deputado Clóvis Rollemberg, 227 – Atalaia",lat:-10.99689,lng:-37.05631,approx:1,status:"offline",age:215,conf:1,src:"Operadora",conn:["Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:23,name:"Escolinha De Futebol Rocket Power",addr:"Av. Francisco Freitas Bendocchi Alves, 480 – Jardins",lat:-10.94713,lng:-37.05832,approx:1,status:"available",age:42,conf:1,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:24,name:"BMJ - Caju Gastrô",addr:"Rua José Luiz da Conceição, 220 – Jardins",lat:-10.94493,lng:-37.0574,approx:1,status:"occupied",age:61,conf:3,src:"Usuários",conn:["CCS2","Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:25,name:"EcoGreen Estacionamento Unit",addr:"Av. Murilo Dantas, 1150 – Farolândia",lat:-10.96965,lng:-37.06086,approx:1,status:"available",age:30,conf:1,src:"Usuários",conn:["Type 2","CCS2"],kw:null,price:null,free:2,total:3,hours:"A confirmar",perk:null},
+  {id:26,name:"MaisVolt - Farolândia",addr:"Av. Murilo Dantas, 242 – Farolândia",lat:-10.96983,lng:-37.06056,approx:1,status:"available",age:21,conf:5,src:"Operadora",conn:["CCS2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:27,name:"Centro Médico Jouberto Uchoa",addr:"Av. Mario Jorge Menezes Viêira, 2375 – Coroa do Meio",lat:-10.95899,lng:-37.04283,approx:1,status:"occupied",age:67,conf:3,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:28,name:"Gotec Recarga São Conrado",addr:"Av. São Cristóvão, 4171 – São Conrado",lat:-10.97014,lng:-37.08284,approx:1,status:"occupied",age:63,conf:3,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:29,name:"Rede ELLO",addr:"R. José Carvalho Pinto, 280 – Jardins",lat:-10.9424,lng:-37.05473,approx:1,status:"available",age:22,conf:5,src:"Operadora",conn:["CCS2","Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:30,name:"Faraó Na Praia",addr:"Av. Inácio Barbosa, 13735 – Aruana",lat:-11.01487,lng:-37.06827,approx:1,status:"available",age:56,conf:2,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:1,total:2,hours:"A confirmar",perk:null},
+  {id:31,name:"Smart Home Tecnologia E Inovações",addr:"R. Cap. Benedito Teófilo Otoní, 477 – 13 de Julho",lat:-10.93077,lng:-37.0478,approx:1,status:"available",age:20,conf:5,src:"Operadora",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:32,name:"VAPT Mix Mateus",addr:"R. Nossa Sra. de Fátima, 438 – José Conrado de Araújo",lat:-10.90606,lng:-37.08322,approx:1,status:"occupied",age:67,conf:3,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:33,name:"Centro Automotivo Mota",addr:"R. Paulo Henrique Machado Pímentel, 125 – Inácio Barbosa",lat:-10.95213,lng:-37.07195,approx:1,status:"available",age:41,conf:1,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:34,name:"Gotec Energia Solar",addr:"Rua José Deodato Soares 312, Ponto Novo",lat:-10.94,lng:-37.0778,approx:1,status:"available",age:36,conf:1,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:35,name:"Movida Aluguel de Carros",addr:"Estacionamento – Aeroporto",lat:-10.9843,lng:-37.0703,approx:1,status:"occupied",age:69,conf:3,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:36,name:"Peugeot - Gama",addr:"Av. Pres. Tancredo Neves, 3402 – Ponto Novo",lat:-10.93911,lng:-37.08101,approx:1,status:"occupied",age:67,conf:3,src:"Usuários",conn:["Type 2","CCS2"],kw:null,price:null,free:0,total:2,hours:"A confirmar",perk:null},
+  {id:37,name:"Pneus Center",addr:"Av. Des. Maynard, 312 – Suíça",lat:-10.92668,lng:-37.06241,approx:1,status:"available",age:36,conf:1,src:"Usuários",conn:["Type 2","GB/T"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:38,name:"Sam's Club",addr:"Av. Deputado Sílvio Teixeira, 870 – Jardins",lat:-10.94283,lng:-37.05638,approx:1,status:"available",age:49,conf:2,src:"Usuários",conn:["CCS2","Type 2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:39,name:"Super Cachorro Quente Imperial",addr:"R. Riachão, 1152 – Suíça",lat:-10.92419,lng:-37.06075,approx:1,status:"available",age:34,conf:1,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:40,name:"VAPT Toldos Deda",addr:"R. Prof. José de Lima Peixoto, 125 – Grageru",lat:-10.94595,lng:-37.0685,approx:1,status:"available",age:42,conf:1,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:41,name:"Auto Peças Vieira",addr:"Rua Acre, 2186 A – Siqueira Campos",lat:-10.91637,lng:-37.07167,approx:1,status:"available",age:26,conf:5,src:"Operadora",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:42,name:"Autotech Premium",addr:"R. Jurandi Gomes de Santana, 75 – Ponto Novo",lat:-10.92868,lng:-37.07836,approx:1,status:"available",age:54,conf:2,src:"Usuários",conn:["CCS2","Type 2"],kw:null,price:null,free:2,total:2,hours:"A confirmar",perk:null},
+  {id:43,name:"Chevrolet - Contorno",addr:"Av. Pres. Tancredo Neves, 1550 – Jardins",lat:-10.95239,lng:-37.05887,approx:1,status:"available",age:37,conf:1,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:44,name:"Gotec Recarga Braúna",addr:"Av. Maranhão, 2462 – Santos Dumont",lat:-10.90305,lng:-37.08483,approx:1,status:"available",age:43,conf:2,src:"Usuários",conn:["CCS2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:45,name:"Jefferson",addr:"R. Srg. Antônio da Silva Viêira, 93 – São Conrado",lat:-10.96647,lng:-37.08366,approx:1,status:"occupied",age:5,conf:4,src:"Usuários",conn:["Type 2"],kw:null,price:null,free:0,total:1,hours:"A confirmar",perk:null},
+  {id:46,name:"Nissan - Sanvel",addr:"Av. Pres. Tancredo Neves, 640 – Jardins",lat:-10.95256,lng:-37.05856,approx:1,status:"available",age:24,conf:5,src:"Operadora",conn:["Type 2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null},
+  {id:47,name:"Vidro X",addr:"Av. Melício Machado, 205 – Atalaia",lat:-10.98627,lng:-37.05879,approx:1,status:"available",age:21,conf:5,src:"Operadora",conn:["CCS2"],kw:null,price:null,free:1,total:1,hours:"A confirmar",perk:null}
+];
+
+const cars=[
+ {id:"dolphin",name:"BYD Dolphin",conn:["CCS2","Type 2"],kw:88},
+ {id:"mini",name:"BYD Dolphin Mini",conn:["CCS2","Type 2"],kw:40},
+ {id:"ora",name:"GWM Ora 03",conn:["CCS2","Type 2"],kw:80},
+ {id:"ex30",name:"Volvo EX30",conn:["CCS2","Type 2"],kw:153},
+ {id:"leaf",name:"Nissan Leaf",conn:["CHAdeMO","Type 2"],kw:50},
+ {id:"songphev",name:"BYD Song Plus (híbrido plug-in)",conn:["Type 2"],kw:7},
+ {id:"gbt",name:"Outro (plugue GB/T)",conn:["GB/T","Type 2"],kw:60}
+];
+
+const coupons=[
+ {id:"c1",title:"Café grátis · parceiro (exemplo)",cost:40,desc:"Um café expresso após carregar em um posto parceiro."},
+ {id:"c2",title:"Lavagem 20% off · parceiro (exemplo)",cost:80,desc:"Vale para lavagem simples ou completa."},
+ {id:"c3",title:"Ingresso 2x1 · cinema parceiro (exemplo)",cost:120,desc:"Segunda a quinta, sessões regulares."},
+ {id:"c4",title:"R$ 20 em energia · MAPERE Parceiros",cost:200,desc:"Crédito para carga nos postos parceiros."}
+];
+
+/* ===================== ESTADO ===================== */
+const S={
+  filters:{radius:5,conn:"all",minKw:0,onlyAvail:false},
+  car:null, points:0, checkins:0,
+  alerts:new Set(), reserved:{}, redeemed:[], sel:null, guest:false, favs:new Set(), reviews:{}
+};
+
+/* ===================== UTIL ===================== */
+const $=s=>document.querySelector(s);
+const km=(a,b)=>{const R=6371,r=x=>x*Math.PI/180;const dLat=r(b.lat-a.lat),dLng=r(b.lng-a.lng);
+  const h=Math.sin(dLat/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLng/2)**2;return 2*R*Math.asin(Math.sqrt(h))*1.3;}; // 1.3 = fator de rota
+const dist=s=>km(user,s);
+const mins=s=>Math.max(1,Math.round(dist(s)/25*60)); // ~25 km/h urbano
+const fmtD=d=>d<1?Math.round(d*1000)+" m":d.toFixed(1).replace(".",",")+" km";
+const age=m=>m<1?"agora":m<60?`há ${m} min`:`há ${Math.round(m/60)} h`;
+const fc=m=>m<=15?"f-new":m<=60?"f-mid":"f-old";
+const fcolor=m=>m<=15?"var(--green)":m<=60?"var(--amber)":"var(--red)";
+const money=v=>"R$ "+v.toFixed(2).replace(".",",");
+const kwTxt=s=>s.kw==null?"kW a confirmar":String(s.kw).replace(".",",")+" kW";
+const priceTxt=s=>s.price==null?"preço a confirmar":money(s.price)+"/kWh";
+const STAT={available:"Livre",occupied:"Ocupado",offline:"Fora do ar"};
+const COL={available:"#16a34a",occupied:"#dc2626",offline:"#6b7280"};
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),3000);}
+function addPts(n){S.points+=n;$("#ptsTop").textContent=S.guest?"Entrar":"★ "+S.points;}
+
+/* ícones (traço, estilo Lucide) */
+const IC={
+ bolt:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+ map:'<path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/>',
+ gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v9H5v-9M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+ car:'<path d="M5 17h14M3 13l2-6h14l2 6v4H3zM7 17v2M17 17v2"/><circle cx="7.5" cy="13.5" r=".6"/><circle cx="16.5" cy="13.5" r=".6"/>',
+ nav:'<path d="M3 11l19-9-9 19-2-8z"/>',
+ cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+ warn:'<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',
+ bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+ sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+ power:'<path d="M18.4 6.6a9 9 0 1 1-12.8 0M12 2v10"/>',
+ eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+ plug:'<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/>',
+ check:'<path d="M20 6 9 17l-5-5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ eyeo:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+ route:'<circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/>',
+ users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+ coin:'<circle cx="12" cy="12" r="10"/><path d="M15 8.5c-.6-.9-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 3 6 1.6 6 4.6 0 1.3-1.3 2.2-3 2.2-1.4 0-2.5-.6-3.1-1.6M12 5.5V7m0 10v1.5"/>',
+ star:'<path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+ crosshair:'<circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="1.5"/>',
+ layers:'<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5M2 17l10 5 10-5"/>',
+ logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>'
+};
+const ic=(n,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+function logo(s,fg,bolt){return `<svg width="${s}" height="${Math.round(s*1.22)}" viewBox="0 0 48 58" aria-hidden="true"><path d="M24 57S3 36 3 21a21 21 0 0 1 42 0c0 15-21 36-21 36z" fill="${fg}"/><path d="M26.5 9 14 28h9l-2 14 13-20h-9z" fill="${bolt}"/></svg>`;}
+function pinShape(c,s){return `<svg width="${s}" height="${Math.round(s*1.25)}" viewBox="0 0 40 50" aria-hidden="true"><path d="M20 49S3 31 3 18a17 17 0 0 1 34 0c0 13-17 31-17 31z" fill="${c}"/></svg>`;}
+function statusPin(c,kind,s){const g=kind==="ok"?'<path d="m12.5 18.5 5 5 10-10" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>':
+  kind==="clock"?'<circle cx="20" cy="18" r="8" fill="none" stroke="#fff" stroke-width="3"/><path d="M20 13v5l3 2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>':
+  '<path d="m14 12 12 12M26 12 14 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/>';
+  return `<svg width="${s}" height="${Math.round(s*1.25)}" viewBox="0 0 40 50" aria-hidden="true"><path d="M20 49S3 31 3 18a17 17 0 0 1 34 0c0 13-17 31-17 31z" fill="${c}"/>${g}</svg>`;}
+const starSVG=(on,s)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${on?"currentColor":"none"}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>`;
+Object.assign(IC,{
+ back:'<path d="m15 18-6-6 6-6"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ google:'<path d="M21 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h5a4.3 4.3 0 0 1-1.9 2.8v2.3h3A9 9 0 0 0 21 12.2z"/><path d="M12 21c2.4 0 4.5-.8 6-2.2l-3-2.3c-.8.5-1.8.9-3 .9a5.3 5.3 0 0 1-5-3.7H3.9v2.3A9 9 0 0 0 12 21z"/><path d="M7 13.7a5.4 5.4 0 0 1 0-3.4V8H3.9a9 9 0 0 0 0 8z"/><path d="M12 6.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 3.9 8L7 10.3a5.3 5.3 0 0 1 5-3.7z"/>',
+ phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+ share:'<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
+ bookmark:'<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+ camera:'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+ clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+ verified:'<path d="M12 2l2.4 2 3.1-.3 1 3 2.6 1.8-1 3 1 3-2.6 1.8-1 3-3.1-.3L12 22l-2.4-2-3.1.3-1-3L2.9 15.5l1-3-1-3L5.5 7.7l1-3 3.1.3z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+ alt:'<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/>',
+ parking:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>',
+ cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/>',
+ timer:'<path d="M10 2h4M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+ cup:'<path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM6 1v3M10 1v3M14 1v3"/>',
+ dc:'<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
+ sock:'<path d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4"/>'
+});
+function hydrate(root=document){
+  root.querySelectorAll("[data-ic]").forEach(e=>{if(e.dataset.done)return;const s=+e.dataset.s||16;
+    e.insertAdjacentHTML("afterbegin",e.dataset.ic==="logo"?logo(s,"#fff","#0a8f6a"):ic(e.dataset.ic,s));e.dataset.done=1;});
+  root.querySelectorAll("[data-pin]").forEach(e=>{if(e.dataset.done)return;e.insertAdjacentHTML("afterbegin",pinShape(e.dataset.pin,+e.dataset.s||30));e.dataset.done=1;});
+}
+hydrate();
+
+function filtered(){
+  const f=S.filters;
+  return stations.filter(s=>dist(s)<=f.radius && (s.kw||0)>=f.minKw &&
+    (f.conn==="all"||s.conn.includes(f.conn)) && (!f.onlyAvail||s.status==="available"))
+    .sort((a,b)=>dist(a)-dist(b));
+}
+
+/* ===================== MAPA (Google Maps, com reserva Leaflet) ===================== */
+const CFG=window.MAPERE_CONFIG||{};
+let M=null, sat=false;
+const BB={s:-11.10,n:-10.80,w:-37.20,e:-36.95};
+const inAju=(lat,lng)=>lat>BB.s&&lat<BB.n&&lng>BB.w&&lng<BB.e;
+
+/* --- adaptador Leaflet (reserva, sem chave) --- */
+function leafletAdapter(){
+  $("#map").innerHTML="";
+  const map=L.map("map",{zoomControl:false}).setView([user.lat,user.lng],14);
+  let base=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors",maxZoom:19}).addTo(map);
+  const alt=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",{attribution:"Mapa © Esri",maxZoom:19});
+  const satl=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Imagens © Esri",maxZoom:19});
+  let warned=false, errs=0;
+  base.on("tileerror",()=>{ if(++errs>=3&&base!==alt&&map.hasLayer(base)){ map.removeLayer(base); base=alt; alt.addTo(map); toast("Usando mapa alternativo (Esri)."); } });
+  alt.on("tileerror",()=>{if(!warned){warned=true;toast("Não consegui carregar o mapa. Verifique sua conexão com a internet.");}});
+  satl.on("tileerror",()=>{if(!warned){warned=true;toast("Não consegui carregar o satélite. Verifique sua conexão.");}});
+  L.control.zoom({position:"bottomright"}).addTo(map);
+  const me=L.marker([user.lat,user.lng],{draggable:true,zIndexOffset:1000,
+    icon:L.divIcon({className:"",html:'<div class="me"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);
+  let dragCb=()=>{};
+  me.on("dragend",e=>{const p=e.target.getLatLng();dragCb(p.lat,p.lng);});
+  const layer=(L.markerClusterGroup?L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:42,spiderfyOnMaxZoom:true,disableClusteringAtZoom:16,iconCreateFunction:c=>L.divIcon({html:`<div class="clu">${c.getChildCount()}</div>`,className:"",iconSize:[40,40]})}):L.layerGroup()).addTo(map); let circle=null;
+  const pinIcon=s=>L.divIcon({className:"",iconSize:[36,36],iconAnchor:[18,36],
+    html:`<div class="pin ${s.age>60?"stale":""}" style="background:${COL[s.status]}"><span>${ic("bolt",16)}</span></div>`});
+  return {name:"leaflet",
+    onDrag(cb){dragCb=cb;},
+    setUser(lat,lng){me.setLatLng([lat,lng]);},
+    draw(list,km){
+      layer.clearLayers();
+      list.forEach(s=>L.marker([s.lat,s.lng],{icon:pinIcon(s)}).addTo(layer)
+        .bindTooltip(`${s.name} · ${STAT[s.status]}`,{direction:"top",offset:[0,-34]}).on("click",()=>openDetail(s.id)));
+      if(circle)map.removeLayer(circle);
+      circle=L.circle([user.lat,user.lng],{radius:km*1000/1.3,color:"#0a8f6a",weight:1,fillOpacity:.04,dashArray:"4 6"}).addTo(map);
+    },
+    panTo(lat,lng){map.panTo([lat,lng]);},
+    setView(lat,lng,z){map.setView([lat,lng],z);},
+    fit(pts){map.fitBounds(pts,{padding:[50,50],maxZoom:15});},
+    setSat(on){if(on){map.removeLayer(base);satl.addTo(map);}else{map.removeLayer(satl);base.addTo(map);}},
+    resize(){map.invalidateSize();}};
+}
+
+/* --- adaptador Google Maps --- */
+function pinSVG(s){
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(
+   `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="48" viewBox="0 0 40 48"><path d="M20 46S4 30 4 18a16 16 0 0 1 32 0c0 12-16 28-16 28z" fill="${COL[s.status]}" stroke="#fff" stroke-width="3"/><path d="M21 9l-8 11h7l-1 8 8-11h-7z" fill="#fff"/></svg>`);
+}
+function googleAdapter(){
+  $("#map").innerHTML="";
+  const gmap=new google.maps.Map($("#map"),{center:{lat:user.lat,lng:user.lng},zoom:14,disableDefaultUI:true,
+    zoomControl:true,zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_CENTER},
+    gestureHandling:"greedy",clickableIcons:false,
+    styles:[{featureType:"poi.business",stylers:[{visibility:"off"}]},{featureType:"transit",stylers:[{visibility:"off"}]}]});
+  const me=new google.maps.Marker({map:gmap,position:{lat:user.lat,lng:user.lng},draggable:true,zIndex:999,title:"Você (arraste para simular)",
+    icon:{path:google.maps.SymbolPath.CIRCLE,scale:9,fillColor:"#2563eb",fillOpacity:1,strokeColor:"#fff",strokeWeight:3}});
+  let dragCb=()=>{}; me.addListener("dragend",e=>dragCb(e.latLng.lat(),e.latLng.lng()));
+  let markers=[], circle=null;
+  return {name:"google",
+    onDrag(cb){dragCb=cb;},
+    setUser(lat,lng){me.setPosition({lat,lng});},
+    draw(list,km){
+      markers.forEach(m=>m.setMap(null));
+      markers=list.map(s=>{
+        const m=new google.maps.Marker({map:gmap,position:{lat:s.lat,lng:s.lng},title:`${s.name} · ${STAT[s.status]}`,
+          icon:{url:pinSVG(s),scaledSize:new google.maps.Size(36,43),anchor:new google.maps.Point(18,43)},opacity:s.age>60?.6:1});
+        m.addListener("click",()=>openDetail(s.id)); return m;});
+      if(circle)circle.setMap(null);
+      circle=new google.maps.Circle({map:gmap,center:{lat:user.lat,lng:user.lng},radius:km*1000/1.3,clickable:false,
+        strokeColor:"#0a8f6a",strokeOpacity:.7,strokeWeight:1,fillColor:"#0a8f6a",fillOpacity:.05});
+    },
+    panTo(lat,lng){gmap.panTo({lat,lng});},
+    setView(lat,lng,z){gmap.setCenter({lat,lng});gmap.setZoom(z);},
+    fit(pts){const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend({lat:p[0],lng:p[1]}));
+      gmap.fitBounds(b,50);google.maps.event.addListenerOnce(gmap,"idle",()=>{if(gmap.getZoom()>15)gmap.setZoom(15);});},
+    setSat(on){gmap.setMapTypeId(on?"hybrid":"roadmap");},
+    resize(){google.maps.event.trigger(gmap,"resize");}};
+}
+function loadGoogle(key){
+  return new Promise((res,rej)=>{
+    window.gm_authFailure=()=>useLeaflet("A chave do Google Maps foi recusada. Confira a chave, as APIs ativadas e as restrições. Usando o mapa alternativo.");
+    window.__gmReady=res;
+    const s=document.createElement("script");
+    s.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(key)+"&v=weekly&language=pt-BR&region=BR&callback=__gmReady";
+    s.onerror=()=>rej(new Error("load")); document.head.appendChild(s);
+    setTimeout(()=>rej(new Error("timeout")),12000);
+  });
+}
+function useLeaflet(msg){M=leafletAdapter();wireMap();render();if(msg)toast(msg);}
+
+/* --- ações comuns do mapa --- */
+function wireMap(){
+  M.onDrag((lat,lng)=>{user={lat,lng};render();toast("Localização simulada atualizada");});
+  M.setSat(sat);
+}
+function fitAll(){if(!M)return;M.fit(filtered().map(s=>[s.lat,s.lng]).concat([[user.lat,user.lng]]));}
+function setUser(lat,lng,msg){user={lat,lng};M.setUser(lat,lng);M.setView(lat,lng,15);render();if(msg)toast(msg);}
+$("#layerBtn").onclick=()=>{sat=!sat;M&&M.setSat(sat);};
+$("#fitBtn").onclick=fitAll;
+$("#locate").onclick=()=>{
+  if(!navigator.geolocation){toast("Seu navegador não permite localização");return;}
+  toast("Buscando sua localização…");
+  navigator.geolocation.getCurrentPosition(p=>setUser(p.coords.latitude,p.coords.longitude,"Localização atualizada"),
+    ()=>toast("Não foi possível obter sua localização. Permita o acesso ou arraste o ponto azul."),{enableHighAccuracy:true,timeout:10000});
+};
+async function geocodeText(q){
+  if(M&&M.name==="google"){
+    return new Promise(res=>new google.maps.Geocoder().geocode({address:q+", Aracaju - SE",region:"br",
+      bounds:{south:BB.s,north:BB.n,west:BB.w,east:BB.e}},(r,st)=>{
+        if(st!=="OK"||!r[0])return res(null);
+        const l=r[0].geometry.location; if(!inAju(l.lat(),l.lng()))return res(null);
+        res({lat:l.lat(),lng:l.lng(),label:r[0].formatted_address.split(",").slice(0,2).join(",")});}));
+  }
+  const u="https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&viewbox=-37.20,-10.80,-36.95,-11.10&q="+encodeURIComponent(q+", Aracaju, Sergipe");
+  const r=await (await fetch(u)).json();
+  return r.length?{lat:+r[0].lat,lng:+r[0].lon,label:r[0].display_name.split(",").slice(0,2).join(",")}:null;
+}
+$("#q").addEventListener("keydown",async e=>{
+  if(e.key!=="Enter")return; const v=e.target.value.trim(); if(!v||!M)return;
+  toast("Buscando endereço…");
+  try{const r=await geocodeText(v);
+    if(!r){toast("Endereço não encontrado em Aracaju");return;}
+    setUser(r.lat,r.lng,"Mostrando postos perto de: "+r.label);
+  }catch(err){toast("Falha na busca. Tente novamente.");}
+});
+
+/* posiciona os pinos pelo endereço exato usando o Geocoding do Google (cache local) */
+async function refineWithGoogle(){
+  let cache={}; try{cache=JSON.parse(localStorage.getItem("mapere_geo_v1")||"{}");}catch(e){}
+  const gc=new google.maps.Geocoder(); let changed=false, denied=false;
+  for(const s of stations){
+    let c=cache[s.id];
+    if(!c){
+      const addr=s.addr.replace(/ – /g,", ").replace(/, s\/n/,"")+", Aracaju - SE, Brasil";
+      const r=await new Promise(res=>gc.geocode({address:addr,region:"br"},(rs,st)=>res({rs,st})));
+      if(r.st==="REQUEST_DENIED"){denied=true;break;}
+      c={skip:1};
+      if(r.st==="OK"&&r.rs[0]){
+        const l=r.rs[0].geometry.location, lt=r.rs[0].geometry.location_type;
+        if(inAju(l.lat(),l.lng())&&(lt==="ROOFTOP"||lt==="RANGE_INTERPOLATED")) c={lat:l.lat(),lng:l.lng()};
+      }
+      cache[s.id]=c; await new Promise(r=>setTimeout(r,120));
+    }
+    if(!c.skip){s.lat=c.lat;s.lng=c.lng;s.approx=0;changed=true;}
+  }
+  try{localStorage.setItem("mapere_geo_v1",JSON.stringify(cache));}catch(e){}
+  if(denied)toast("Ative a Geocoding API na sua chave do Google para posicionar os pinos com precisão.");
+  else if(changed){render();}
+}
+
+function drawMap(list){ if(M){M.setUser(user.lat,user.lng);M.draw(list,S.filters.radius);} }
+
+async function boot(){
+  renderLogin();
+  if(CFG.GOOGLE_MAPS_KEY){
+    try{await loadGoogle(CFG.GOOGLE_MAPS_KEY);M=googleAdapter();wireMap();render();refineWithGoogle();}
+    catch(e){useLeaflet("Não consegui carregar o Google Maps. Usando o mapa alternativo.");}
+  }else{ M=leafletAdapter();wireMap();render(); }
+}
+
+/* ===================== LISTA ===================== */
+function cardHTML(s){
+  const compat=S.car? s.conn.some(c=>S.car.conn.includes(c)):null;
+  return `<div class="card" data-id="${s.id}" data-s="${s.status}">
+   <div class="row sp"><h3>${s.name}</h3><span class="badge b-${s.status}">${STAT[s.status]}</span></div>
+   <div class="sub">${fmtD(dist(s))} · ${mins(s)} min de carro · ${s.free}/${s.total} vagas livres</div>
+   <div>${s.conn.map(c=>`<span class="tag">${c}</span>`).join("")}<span class="tag">${kwTxt(s)}</span><span class="tag">${priceTxt(s)}</span>${s.approx?`<span class="tag">posição aproximada</span>`:""}
+   ${compat===true?'<span class="tag ok">✓ Compatível</span>':compat===false?'<span class="tag warn">Plugue incompatível</span>':""}
+   ${s.perk?`<span class="tag gift">🎁 ${s.perk.txt}</span>`:""}</div>
+   <div class="fresh ${fc(s.age)}"><span class="dot" style="background:${fcolor(s.age)}"></span>
+     Atualizado ${age(s.age)} · ${s.conf} confirmaç${s.conf===1?"ão":"ões"} · fonte: ${s.src}${s.age>60?" · pode estar desatualizado":""}</div>
+  </div>`;
+}
+function render(){
+  const list=filtered();
+  $("#count").textContent=list.length?`${list.length} posto${list.length>1?"s":""} em ${S.filters.radius} km · mais perto primeiro`:"Nenhum posto encontrado";
+  $("#list").innerHTML=list.length?list.map(cardHTML).join(""):
+   `<div class="empty"><p style="font-size:30px">🔌</p><p><b>Nenhum eletroposto em ${S.filters.radius} km</b></p>
+    <p class="sub" style="margin:6px 0 12px">Tente ampliar a busca ou remover filtros.</p>
+    <button class="btn sm" id="widen">Ampliar para ${nextRadius()} km</button></div>`;
+  $("#list").querySelectorAll(".card").forEach(c=>c.onclick=()=>openDetail(+c.dataset.id));
+  const w=$("#widen"); if(w) w.onclick=()=>{S.filters.radius=nextRadius();renderChips();render();};
+  drawMap(list);
+  renderChips();
+}
+function nextRadius(){const r=[2,5,10,20,30];return r.find(x=>x>S.filters.radius)||30;}
+
+function renderChips(){
+  const f=S.filters;
+  const chips=[
+    `<button class="chip ${f.onlyAvail?"on":""}" data-k="avail">${ic("check",14)}Só disponíveis</button>`,
+    `<button class="chip" data-k="radius">${ic("pin",14)}${f.radius} km</button>`,
+    `<button class="chip ${f.conn!=="all"?"on":""}" data-k="conn">${ic("plug",14)}${f.conn==="all"?"Todos plugues":f.conn}</button>`,
+    `<button class="chip ${f.minKw?"on":""}" data-k="kw">${ic("bolt",14)}${f.minKw?"≥ "+f.minKw+" kW":"Qualquer kW"}</button>`,
+    S.car?`<button class="chip on" data-k="car">${ic("car",14)}${S.car.name}</button>`:""
+  ];
+  $("#chips").innerHTML=chips.join("");
+  $("#chips").querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k;
+    if(k==="avail") f.onlyAvail=!f.onlyAvail;
+    if(k==="radius") f.radius=[2,5,10,20,30][([2,5,10,20,30].indexOf(f.radius)+1)%5];
+    if(k==="conn"){const o=["all","CCS2","Type 2","CHAdeMO","GB/T"];f.conn=o[(o.indexOf(f.conn)+1)%o.length];}
+    if(k==="kw"){const o=[0,22,50,100];f.minKw=o[(o.indexOf(f.minKw)+1)%o.length];}
+    if(k==="car") switchTab("car");
+    else render();
+  });
+}
+
+/* bottom sheet */
+$("#handle").onclick=()=>$("#sheet").classList.toggle("big");
+
+/* ===================== DETALHE ===================== */
+function modal(html){ $("#panel").innerHTML=html; $("#modal").classList.add("show"); $("#panel").scrollTop=0;
+  const x=$("#panel .x"); if(x) x.onclick=closeModal; }
+function closeModal(){ $("#modal").classList.remove("show"); }
+$("#modal").onclick=e=>{ if(e.target.id==="modal") closeModal(); };
+
+/* ===================== PÁGINAS CHEIAS: DETALHE E AVALIAR ===================== */
+const PG={back:null,all:null};
+function showPage(title,body,foot,keep){
+  const bd=$("#pgBody"), top=keep?bd.scrollTop:0;
+  $("#pgTitle").textContent=title; bd.innerHTML=body;
+  $("#pgFoot").innerHTML=foot||""; $("#pgFoot").style.display=foot?"block":"none";
+  $("#pg").classList.add("show"); hydrate($("#pg")); bd.scrollTop=top;
+}
+function closePage(){ $("#pg").classList.remove("show"); PG.back=null; PG.all=null; }
+$("#pgBack").onclick=()=>{ if(PG.back){const f=PG.back;PG.back=null;f();} else closePage(); };
+
+function needAuth(){
+  if(!S.guest) return false;
+  modal(`<button class="x">✕</button><h2>Entre para continuar</h2>
+   <p class="sub" style="margin:8px 0 14px">Crie uma conta ou entre para fazer check-in, avaliar postos, reservar vaga e ganhar pontos.</p>
+   <button class="btn" id="gAuth">Entrar ou criar conta</button>
+   <button class="btn ghost" id="gLater" style="margin-top:8px">Agora não</button>`);
+  $("#gAuth").onclick=()=>{closeModal();closePage();showLogin();};
+  $("#gLater").onclick=closeModal;
+  return true;
+}
+
+function nearestAvailable(except){
+  return stations.filter(s=>s.id!==except.id&&s.status==="available"&&(!S.car||s.conn.some(c=>S.car.conn.includes(c))))
+    .sort((a,b)=>dist(a)-dist(b))[0];
+}
+const bairroDe=s=>{const p=s.addr.split(" – ");return (p[p.length-1]||"Aracaju").split(" / ")[0];};
+const speedTag=s=>s.kw==null?(s.conn.some(c=>c!=="Type 2")?"Carga rápida DC":"Carga AC"):s.kw>=100?"Ultrarrápido DC":s.kw>=40?"Carga rápida DC":s.kw>=11?"Semirrápida":"Carga lenta";
+const SPILL={available:"LIVRE AGORA",occupied:"OCUPADO NO MOMENTO",offline:"FORA DO AR"};
+const CT={"CCS2":["DC","Carga rápida em corrente contínua"],"CHAdeMO":["DC","Carga rápida em corrente contínua"],"GB/T":["DC","Padrão chinês"],"Type 2":["AC","Carga em corrente alternada"],"Outro":["","Tomada fora do padrão dos carros"]};
+const SEED=[["Motorista (BYD Dolphin)","Carregou liso e a vaga ao lado estava vazia."],["Motorista (GWM Ora 03)","Conector um pouco duro, mas funcionou de primeira."],["Motorista de app","Tinha fila de 2 carros no fim da tarde. Vale chegar mais cedo."],["Motorista (Volvo EX30)","Sinal fraco no subsolo, usei o app da rede."],["Motorista (Nissan Leaf)","Só consegui carregar no plugue Type 2."]];
+function reviewsOf(s){
+  const own=S.reviews[s.id]||[], n=Math.min(s.conf,3), seeded=[];
+  for(let i=0;i<n;i++){const t=SEED[(s.id+i)%SEED.length];seeded.push({name:t[0],txt:t[1],t:s.age+10+i*35,sim:1});}
+  return own.concat(seeded);
+}
+const iniciais=n=>{const w=n.replace(/[()]/g,"").split(/\s+/).filter(Boolean);return ((w[0]||"M")[0]+((w[1]||"")[0]||"")).toUpperCase();};
+const STARLBL=["Toque para avaliar","Ruim","Regular","Ok","Bom","Ótimo"];
+
+function openDetail(id,keep){
+  const s=stations.find(x=>x.id===id); S.sel=id; PG.back=null;
+  M&&M.panTo(s.lat,s.lng);
+  const alt=nearestAvailable(s), rsv=S.reserved[id], al=S.alerts.has(id), fav=S.favs.has(id);
+  const rv=reviewsOf(s), shown=PG.all===id?rv:rv.slice(0,2);
+  const verified=s.conf>=3&&s.age<=15;
+  const body=`
+   <div class="strip"><span class="chipx">${ic("pin",14)}${bairroDe(s)}, Aracaju</span>
+     <div class="row"><button class="rbtn" data-a="share" aria-label="Compartilhar">${ic("share",18)}</button>
+     <button class="rbtn ${fav?"on":""}" data-a="fav" aria-label="Salvar favorito">${ic("bookmark",18)}</button></div></div>
+   <div class="hero">
+     <svg class="bgart" viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"><path d="M-10 120 L310 70"/><path d="M90 190 L130 -10" stroke-width="14"/><path d="M220 190 L250 -10" stroke-width="7"/></svg>
+     <span class="tag2">${speedTag(s)}</span>
+     <div class="bot"><div><small>Aracaju · ${bairroDe(s)}</small><b>${s.name}</b></div>
+       <div class="pwr"><b>${s.kw==null?"—":String(s.kw).replace(".",",")+" kW"}</b><span>Potência</span></div></div>
+   </div>
+   <div><div class="dtitle">${s.name}</div><div class="daddr">${ic("pin",15)}<span>${s.addr}</span></div></div>
+   <div class="pills"><span class="spill ${s.status}"><i></i>${SPILL[s.status]}</span>
+     <span class="spill dist">${ic("nav",14)}${fmtD(dist(s))} de você (${mins(s)} min)</span></div>
+   <div class="fbanner"><div><b class="${fc(s.age)}">Atualizado ${age(s.age)}</b>
+     <span>${s.conf} confirmaç${s.conf===1?"ão recente":"ões recentes"} · Fonte: ${s.src==="Usuários"?"Usuários MAPERE":s.src}${s.age>60?" · pode estar desatualizado":""}</span></div>
+     <span style="color:${verified?"var(--brand)":"#cbd2d9"}" title="${verified?"Verificado pela comunidade":"Poucas confirmações"}">${ic("verified",22)}</span></div>
+   ${alt?`<div class="altbox"><div class="ai">${ic("alt",18)}</div><div><small>Alternativa inteligente</small>
+     <p>${s.status==="available"?"Se ficar lotado, a alternativa compatível mais próxima é":"Este posto não está livre. A alternativa compatível mais próxima é"} <b>${alt.name}</b> (${fmtD(dist(alt))} · ${kwTxt(alt)} · ${alt.free} vaga${alt.free===1?"":"s"} livre${alt.free===1?"":"s"}).</p>
+     <button class="btn sm sec" data-a="alt" data-id="${alt.id}">Ver este posto</button></div></div>`:""}
+   <div class="ck"><div class="sech" style="margin:0"><h3>${ic("pin",18)}Você está no local?</h3><span class="pts2">+10 pts</span></div>
+     <p class="sub">Ajude motoristas de Aracaju informando o status em tempo real com 1 toque:</p>
+     <div class="ck3">
+       <button class="l" data-a="ci" data-v="available"><span class="ci">${ic("check",18)}</span><b>LIVRE</b><small>Pronto p/ uso</small></button>
+       <button class="o" data-a="ci" data-v="occupied"><span class="ci">${ic("timer",18)}</span><b>OCUPADO</b><small>Carregando</small></button>
+       <button class="d" data-a="ci" data-v="offline"><span class="ci">${ic("warn",18)}</span><b>DEFEITO</b><small>Fora do ar</small></button>
+     </div>
+     <button class="btn sm ghost" data-a="eval" style="margin-top:12px;width:100%">${ic("star",16)}Avaliar com nota, foto e comentário</button></div>
+   ${s.perk?`<div class="perk"><div class="pi">${ic("cup",24)}</div><div><small>🎁 Benefício exclusivo</small><b>${s.perk.partner}</b><p>${s.perk.txt} para quem carrega aqui. Mostre seu check-in. <i>(Oferta de exemplo)</i></p></div></div>`:""}
+   <div><div class="sech"><h3>${ic("sliders",18)}Especificações técnicas</h3><span class="lk">${s.conn.length} conector${s.conn.length>1?"es":""}</span></div>
+     <div class="box2">${s.conn.map((c,i)=>{const t=CT[c]||["",""];return `${i?'<div class="hr"></div>':""}<div class="crow"><div class="ci2">${ic(t[0]==="AC"?"sock":"plug",20)}</div>
+       <div class="ct"><b>Plugue ${c}${t[0]?" ("+t[0]+")":""}</b><span>${t[1]}</span></div><span class="badge b-${s.status}">${STAT[s.status]}</span></div>`;}).join("")}</div>
+     <div class="qg">
+       <div><small>${ic("parking",15)}Vagas</small><b>${s.free} de ${s.total} livres</b><span>Posto com ${s.total} vaga${s.total>1?"s":""}</span></div>
+       <div><small>${ic("cash",15)}Tarifa</small><b>${priceTxt(s)}</b><span>${s.price==null?"Confirme com a rede":"App parceiro ou cartão"}</span></div>
+       <div><small>${ic("clock",15)}Horário</small><b>${s.hours}</b><span>${s.hours==="A confirmar"?"Sem dado da operadora":"Informado pelo local"}</span></div>
+       <div><small>${ic("pin",15)}Localização</small><b>${s.approx?"Aproximada":"Ponto de referência"}</b><span>${s.approx?"Posição pela rua":"Coordenada confirmada"}</span></div></div></div>
+   <div><div class="sech"><h3>${ic("users",18)}Últimos relatos${rv.some(r=>r.sim)?'<span class="simtag">exemplos simulados</span>':""}</h3>
+       ${rv.length>2?`<button class="lk" data-a="all">${PG.all===id?"Ver menos":"Ver todos ("+rv.length+")"}</button>`:""}</div>
+     <div class="box2">${shown.length?shown.map(r=>`<div class="rel"><div class="av">${iniciais(r.name)}</div><div class="rt">
+       <div><b>${r.name}</b><i>${r.t<1?"agora":age(r.t).replace("há","Há")}</i></div>
+       ${r.rating?`<div class="stars" style="justify-content:flex-start">${[1,2,3,4,5].map(n=>starSVG(n<=r.rating,13)).join("")}</div>`:""}
+       <p>${r.txt}</p></div></div>`).join('<div class="hr"></div>'):'<p class="sub">Ainda não há relatos. Seja o primeiro a avaliar.</p>'}</div></div>
+   <div style="display:flex;flex-direction:column;gap:10px">
+     <button class="btn" data-a="nav" style="height:50px">${ic("nav",18)}Navegar com GPS (Waze / Maps)</button>
+     <button class="rowbtn" data-a="res"><span class="l2">${ic("timer",19)}${rsv?"Vaga reservada "+rsv:"Segurar vaga (15 a 45 min)"}</span>${rsv?"<em class=\"on\">Ativa</em>":"<em>Taxa R$ 3,00</em>"}</button>
+     <button class="rowbtn soft" data-a="alert"><span class="l2">${ic("bell",18)}Avisar quando conector liberar</span><em class="${al?"on":""}">${al?"Ativo (push)":"Desativado"}</em></button>
+     <button class="reportlk" data-a="prob">${ic("warn",16)}Reportar conector com defeito (+15 pts)</button>
+     <div class="simnote">Posições, status, preços e relatos são simulados neste protótipo.</div>
+   </div>`;
+  showPage("Detalhes do eletroposto",body,"",keep);
+}
+$("#pgBody").addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]"); if(!b)return; const a=b.dataset.a;
+  const s=stations.find(x=>x.id===S.sel); if(!s&&a!=="star"&&a!=="tag"&&a!=="stat"&&a!=="photo"&&a!=="rmphoto")return;
+  if(a==="alt")return openDetail(+b.dataset.id);
+  if(a==="share"){const url=location.href.split("#")[0];
+    if(navigator.share){navigator.share({title:s.name,text:"Veja este eletroposto no MAPERE",url}).catch(()=>{});}
+    else if(navigator.clipboard){navigator.clipboard.writeText(url).then(()=>toast("Link copiado"),()=>toast("Copie o link da barra de endereço"));}
+    else toast("Copie o link da barra de endereço");return;}
+  if(a==="fav"){if(needAuth())return;S.favs.has(s.id)?S.favs.delete(s.id):S.favs.add(s.id);toast(S.favs.has(s.id)?"Posto salvo nos favoritos":"Removido dos favoritos");return openDetail(s.id,true);}
+  if(a==="all"){PG.all=PG.all===s.id?null:s.id;return openDetail(s.id,true);}
+  if(a==="nav")return openExt(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(s.name+", "+s.addr+", Aracaju - SE")}`);
+  if(a==="res")return openReserve(s);
+  if(a==="alert")return toggleAlert(s);
+  if(a==="prob")return openProblem(s);
+  if(a==="eval")return openAvaliar(s);
+  if(a==="ci")return quickCheckin(s,b.dataset.v);
+});
+function openExt(u){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();}
+
+function applyStatus(s,v){
+  s.status=v; s.age=0; s.conf++; s.src="Usuários";
+  if(v==="available"&&s.free===0)s.free=1;
+  if(v==="occupied")s.free=0;
+}
+function quickCheckin(s,v){
+  if(needAuth())return;
+  applyStatus(s,v);
+  (S.reviews[s.id]=S.reviews[s.id]||[]).unshift({name:"Você"+(S.car?" ("+S.car.name+")":""),txt:v==="available"?"Check-in: posto livre.":v==="occupied"?"Check-in: posto ocupado.":"Check-in: posto fora do ar.",t:0});
+  S.checkins++; addPts(10); toast("Status atualizado! Você ganhou +10 pts"); render(); openDetail(s.id,true);
+}
+function toggleAlert(s){
+  if(needAuth())return;
+  if(S.alerts.has(s.id)){S.alerts.delete(s.id);toast("Aviso desativado");openDetail(s.id,true);return;}
+  S.alerts.add(s.id); toast("Avisaremos quando "+s.name+" liberar");
+  openDetail(s.id,true);
+  if(s.status!=="available"){ // simula o posto ficando livre
+    setTimeout(()=>{ if(!S.alerts.has(s.id)) return;
+      s.status="available"; s.free=Math.max(1,s.free); s.age=0; s.conf++; S.alerts.delete(s.id);
+      toast("🔔 "+s.name+" ficou livre!"); render(); if(S.sel===s.id&&$("#pg").classList.contains("show")&&!PG.back)openDetail(s.id,true);
+    },8000);
+  }
+}
+function openReserve(s){
+  if(needAuth())return;
+  const opts=[[15,"3,00"],[30,"5,00"],[45,"7,00"]]; let pick=15;
+  modal(`<button class="x">✕</button><h2>Reservar vaga com tolerância</h2><div class="sub">${s.name}</div>
+   <p class="sub" style="margin:10px 0 14px">A vaga fica bloqueada para outros motoristas durante o seu trajeto. Tolerância de 15 min após o horário.</p>
+   <div id="rads">${opts.map(o=>`<div class="rad ${o[0]===pick?"on":""}" data-m="${o[0]}"><span>Chegar em até ${o[0]} minutos</span><b>R$ ${o[1]}</b></div>`).join("")}</div>
+   <p class="sub">Valores simulados. Nenhuma cobrança real é feita.</p>
+   <button class="btn" id="ok" style="margin-top:14px">Confirmar bloqueio provisório</button>`);
+  $("#rads").querySelectorAll(".rad").forEach(r=>r.onclick=()=>{pick=+r.dataset.m;$("#rads").querySelectorAll(".rad").forEach(x=>x.classList.toggle("on",x===r));});
+  $("#ok").onclick=()=>{const t=new Date(Date.now()+pick*60000);
+    S.reserved[s.id]="até "+t.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+    closeModal(); toast("Vaga reservada por "+pick+" min"); openDetail(s.id,true);};
+}
+function openProblem(s){
+  if(needAuth())return;
+  const opts=["Não liga / sem energia","Conector danificado","Pagamento não funciona","Vaga ocupada por carro a combustão"];
+  modal(`<button class="x">✕</button><h2>Reportar problema</h2><div class="sub">${s.name}</div>
+   <h4>O que aconteceu?</h4><div class="opts" id="po">${opts.map((o,i)=>`<label data-i="${i}">${o}</label>`).join("")}</div>`);
+  $("#po").querySelectorAll("label").forEach(l=>l.onclick=()=>{
+    const i=+l.dataset.i; applyStatus(s,i===3?"occupied":"offline");
+    (S.reviews[s.id]=S.reviews[s.id]||[]).unshift({name:"Você",txt:"Problema reportado: "+opts[i]+".",t:0});
+    addPts(15); closeModal(); toast("Aviso enviado. +15 pts"); render(); openDetail(s.id,true);});
+}
+
+/* ---- Avaliar posto (check-in completo) ---- */
+const TAGS=["Carga rápida de verdade","Fácil de achar","Bem iluminado à noite","Preço justo","Costuma ter fila","Vaga ocupada por carro a combustão"];
+function openAvaliar(s){
+  if(needAuth())return;
+  const f={v:null,r:0,tags:new Set(),photo:null,txt:""};
+  const hora=new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  PG.back=()=>openDetail(s.id);
+  const draw=()=>{
+    const body=`
+     <div class="sthead"><div class="ib">${ic("plug",26)}</div><div><b>${s.name}</b><span>Check-in às ${hora} · ${s.conn.join(" / ")} · ${kwTxt(s)}</span></div></div>
+     <div><div class="qh"><h3>Como está o posto agora?</h3><span>Obrigatório</span></div>
+       <div class="sb3">
+         <button data-a="stat" data-v="available" class="${f.v==="available"?"sel available":""}">${statusPin("#16a34a","ok",30)}Livre</button>
+         <button data-a="stat" data-v="occupied" class="${f.v==="occupied"?"sel occupied":""}">${statusPin("#f59e0b","clock",30)}Ocupado</button>
+         <button data-a="stat" data-v="offline" class="${f.v==="offline"?"sel offline":""}">${statusPin("#dc2626","x",30)}Com defeito</button></div></div>
+     <div><div class="qh"><h3>Sua nota para o posto</h3></div>
+       <div class="stars2">${[1,2,3,4,5].map(n=>`<button data-a="star" data-n="${n}" class="${n<=f.r?"on":""}" aria-label="${n} estrela${n>1?"s":""}">${starSVG(n<=f.r,34)}</button>`).join("")}<span>${STARLBL[f.r]}</span></div></div>
+     <div><div class="qh"><h3>O que vale saber?</h3></div>
+       <div class="tags2">${TAGS.map((t,i)=>`<button data-a="tag" data-i="${i}" class="${f.tags.has(i)?"on":""}">${t}</button>`).join("")}</div></div>
+     <div><div class="qh"><h3>Foto do carregador <span>· opcional</span></h3></div>
+       ${f.photo?`<div class="photo" style="flex-direction:column"><img src="${f.photo}" alt="Foto escolhida"><button data-a="rmphoto" class="btn sm ghost">Remover foto</button></div>`:
+         `<button class="photo" data-a="photo">${ic("camera",22)}Tirar foto do carregador</button>`}
+       <p class="hint2">Mostre a tela do totem e o plugue. Evite placas de carro e rostos. No protótipo a foto fica só no seu aparelho.</p>
+       <input type="file" id="phIn" accept="image/*" capture="environment" hidden></div>
+     <div><div class="qh"><h3>Comentário <span>· opcional</span></h3></div>
+       <textarea class="cm" id="cmIn" placeholder="Ex.: o carregador 2 só libera pelo app da rede.">${f.txt}</textarea></div>`;
+    const foot=`<div class="note">${ic("clock",16)}<span>O posto aparece como “${f.v?{available:"livre",occupied:"ocupado",offline:"fora do ar"}[f.v]:"livre"}” para quem está procurando, marcado com o horário do envio.</span></div>
+      <button class="btn" id="sendRv" ${f.v?"":"disabled"} style="height:50px">Enviar avaliação</button>`;
+    showPage("Avaliar posto",body,foot,true);
+    $("#cmIn").oninput=e=>{f.txt=e.target.value;};
+    $("#phIn").onchange=e=>{const fl=e.target.files&&e.target.files[0];if(fl){try{f.photo=URL.createObjectURL(fl);}catch(x){f.photo=null;}f.txt=$("#cmIn").value;draw();}};
+    $("#sendRv").onclick=()=>{
+      applyStatus(s,f.v);
+      const tagTxt=[...f.tags].map(i=>TAGS[i]).join(" · ");
+      const txt=(f.txt.trim()||tagTxt||"Check-in feito.");
+      (S.reviews[s.id]=S.reviews[s.id]||[]).unshift({name:"Você"+(S.car?" ("+S.car.name+")":""),txt,rating:f.r,t:0});
+      const bonus=(f.photo||f.txt.trim()||f.r)?5:0; S.checkins++; addPts(10+bonus);
+      PG.back=null; toast("Avaliação enviada! +"+(10+bonus)+" pts"); render(); openDetail(s.id);
+    };
+  };
+  PG.avaliar=(a,b)=>{
+    if(a==="stat"){f.v=b.dataset.v;f.txt=$("#cmIn").value;draw();}
+    if(a==="star"){f.r=+b.dataset.n===f.r?0:+b.dataset.n;f.txt=$("#cmIn").value;draw();}
+    if(a==="tag"){const i=+b.dataset.i;f.tags.has(i)?f.tags.delete(i):f.tags.add(i);f.txt=$("#cmIn").value;draw();}
+    if(a==="photo")$("#phIn").click();
+    if(a==="rmphoto"){f.photo=null;f.txt=$("#cmIn").value;draw();}
+  };
+  draw();
+}
+$("#pgBody").addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b&&PG.avaliar&&PG.back)PG.avaliar(b.dataset.a,b);});
+
+
+/* ===================== VANTAGENS ===================== */
+function renderPerks(){
+  const lvl=S.points>=200?"Ouro":S.points>=80?"Prata":"Bronze";
+  const nextAt=S.points>=200?200:S.points>=80?200:80;
+  $("#perks").innerHTML=`<h2>Vantagens de parceiros</h2>
+   <p class="sub">Cada check-in e aviso de problema rende pontos. Troque por descontos em parceiros.</p>
+   <div class="card" style="cursor:default;margin-top:12px"><div class="row sp"><b>⭐ ${S.points} pontos</b><span class="badge" style="background:var(--amber)">${lvl}</span></div>
+    <div class="bar"><i style="width:${Math.min(100,S.points/nextAt*100)}%"></i></div>
+    <div class="sub">${S.checkins} contribuiç${S.checkins===1?"ão":"ões"} · próximo nível com ${nextAt} pts</div>
+    <button class="btn sm sec" id="demoPts" style="margin-top:8px">+50 pts (atalho para a demo)</button></div>
+   <h4 style="font-size:13px;color:var(--muted);margin:14px 0 8px;text-transform:uppercase">Resgatar</h4>
+   ${coupons.map(c=>{const got=S.redeemed.includes(c.id);return `<div class="coupon">
+     <div class="row sp"><b>${c.title}</b><span class="sub">${c.cost} pts</span></div>
+     <div class="sub">${c.desc}</div>
+     ${got?`<div class="code">MAPERE-${c.id.toUpperCase()}-${(c.cost*7+13)}</div>`:
+      `<button class="btn sm" data-c="${c.id}" style="margin-top:8px" ${S.points<c.cost?"disabled style='margin-top:8px;opacity:.45'":""}>Resgatar</button>`}
+   </div>`}).join("")}`;
+  $("#demoPts").onclick=()=>{if(needAuth())return;addPts(50);renderPerks();};
+  $("#perks").querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{
+    if(needAuth())return; const c=coupons.find(x=>x.id===b.dataset.c); if(S.points<c.cost)return;
+    S.points-=c.cost; S.redeemed.push(c.id); addPts(0); toast("Cupom resgatado!"); renderPerks();});
+}
+
+/* ===================== MEU CARRO ===================== */
+function renderCar(){
+  $("#car").innerHTML=`<h2>Meu carro</h2>
+   <p class="sub">Não sabe qual plugue usa? Escolha seu modelo e filtramos só os postos compatíveis.</p>
+   <div style="margin-top:12px">${cars.map(c=>`<div class="card" data-car="${c.id}" style="${S.car&&S.car.id===c.id?"border:2px solid var(--brand)":""}">
+     <div class="row sp"><b>${c.name}</b>${S.car&&S.car.id===c.id?'<span class="badge b-available">Selecionado</span>':""}</div>
+     <div>${c.conn.map(x=>`<span class="tag">${x}</span>`).join("")}<span class="tag">até ${c.kw} kW</span></div></div>`).join("")}
+   ${S.car?'<button class="btn ghost" id="clearCar">Remover meu carro</button>':""}
+   <p class="sub" style="margin-top:10px">Dados ilustrativos, sujeitos a validação com as montadoras.</p>
+   <button class="btn red" id="logoutBtn" style="margin-top:14px">${ic("logout",17)}Sair da conta</button></div>`;
+  $("#logoutBtn").onclick=logout;
+  $("#car").querySelectorAll("[data-car]").forEach(el=>el.onclick=()=>{
+    S.car=cars.find(c=>c.id===el.dataset.car);
+    S.filters.conn=S.car.conn[0]; S.filters.minKw=0;
+    toast(`Filtro aplicado: ${S.car.conn[0]} (${S.car.name})`); render(); renderCar(); switchTab("explore");});
+  const cl=$("#clearCar"); if(cl) cl.onclick=()=>{S.car=null;S.filters.conn="all";render();renderCar();};
+}
+
+/* ===================== NAV ===================== */
+function switchTab(t){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="v-"+t));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  $("#chips").style.display=t==="explore"?"flex":"none";
+  if(t==="perks")renderPerks(); if(t==="car")renderCar();
+  if(t==="explore")setTimeout(()=>M&&M.resize(),50);
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+$("#btnFilter").onclick=()=>modal(`<button class="x">✕</button><h2>Filtros</h2>
+  <h4>Raio</h4><div class="choice" id="fr">${[2,5,10,20].map(r=>`<button data-v="${r}" ${S.filters.radius==r?'style="border-color:var(--brand)"':""}>${r} km</button>`).join("")}</div>
+  <h4>Plugue</h4><div class="choice" id="fc" style="flex-wrap:wrap">${["all","CCS2","Type 2","CHAdeMO","GB/T"].map(r=>`<button data-v="${r}" ${S.filters.conn==r?'style="border-color:var(--brand)"':""}>${r==="all"?"Todos":r}</button>`).join("")}</div>
+  <h4>Potência mínima</h4><div class="choice" id="fk">${[0,22,50,100].map(r=>`<button data-v="${r}" ${S.filters.minKw==r?'style="border-color:var(--brand)"':""}>${r?r+" kW":"Qualquer"}</button>`).join("")}</div>
+  <div class="opts"><label id="fo"><span class="sw ${S.filters.onlyAvail?"on":""}"></span> Somente disponíveis</label></div>
+  <button class="btn" id="fok" style="margin-top:12px">Ver resultados</button>`);
+document.addEventListener("click",e=>{
+  const b=e.target.closest("#fr button,#fc button,#fk button"); if(!b)return;
+  const id=b.parentElement.id, v=b.dataset.v;
+  if(id==="fr")S.filters.radius=+v; if(id==="fc")S.filters.conn=v; if(id==="fk")S.filters.minKw=+v;
+  b.parentElement.querySelectorAll("button").forEach(x=>x.style.borderColor="");b.style.borderColor="var(--brand)";
+});
+document.addEventListener("click",e=>{
+  if(e.target.closest("#fo")){S.filters.onlyAvail=!S.filters.onlyAvail;e.target.closest("#fo").querySelector(".sw").classList.toggle("on");}
+  if(e.target.closest("#fok")){closeModal();render();}
+});
+
+/* ===================== BOAS-VINDAS / LOGIN / PERFIL ===================== */
+const login={role:"driver",signup:false};
+const ROLE_DESC={
+  driver:"Encontre postos livres perto de você, faça check-in e ganhe vantagens.",
+  owner:"Gerencie seus postos, atualize o status oficial e crie ofertas para atrair motoristas."
+};
+function renderLogin(){
+  document.querySelectorAll("#roleSeg button").forEach(b=>b.classList.toggle("on",b.dataset.r===login.role));
+  $("#roleDesc").textContent=ROLE_DESC[login.role];
+  $("#fBiz").style.display=(login.role==="owner"&&login.signup)?"block":"none";
+  $("#lTitle").textContent=login.signup?"Criar conta":"Entrar";
+  $("#btnLogin").textContent=login.signup?"Criar conta":"Entrar como "+(login.role==="owner"?"dono de posto":"motorista");
+  $("#lAsk").textContent=login.signup?"Já tem conta?":"Ainda não tem conta?";
+  $("#btnMode").innerHTML="<b>"+(login.signup?"Entrar":"Criar conta")+"</b>";
+  $("#btnGuest").style.display=login.role==="driver"?"block":"none";
+}
+function showLogin(){ $("#login").classList.remove("hide"); $("#welcome").classList.add("hide"); renderLogin(); }
+document.querySelectorAll("#roleSeg button").forEach(b=>b.onclick=()=>{login.role=b.dataset.r;renderLogin();});
+$("#btnMode").onclick=()=>{login.signup=!login.signup;renderLogin();};
+$("#eye").onclick=()=>{const i=$("#inPass");i.type=i.type==="password"?"text":"password";};
+$("#btnForgot").onclick=()=>{
+  modal(`<button class="x">✕</button><h2>Recuperar senha</h2>
+   <p class="sub" style="margin:8px 0 12px">Informe seu e-mail e enviaremos um link para criar uma nova senha.</p>
+   <label class="fld"><span>E-mail</span><input id="fgMail" type="email" placeholder="voce@email.com"></label>
+   <button class="btn" id="fgOk">Enviar link</button><p class="sub" style="margin-top:8px">Simulado: nenhum e-mail é enviado.</p>`);
+  $("#fgOk").onclick=()=>{closeModal();toast("Se o e-mail existir, enviaremos o link (simulado)");};
+};
+$("#btnLogin").onclick=()=>{
+  const mail=$("#inMail").value.trim(), biz=$("#inBiz").value.trim();
+  if(login.role==="owner"){ if(biz) owner.name=biz; enterOwner(); }
+  else enterDriver(mail);
+};
+$("#btnGoogle").onclick=()=>{ toast("Login com Google simulado"); if(login.role==="owner")enterOwner(); else enterDriver("google"); };
+$("#btnGuest").onclick=()=>enterDriver("",true);
+
+function enterDriver(mail,guest){
+  S.role="driver"; S.guest=!!guest;
+  $("#login").classList.add("hide"); $("#welcome").classList.add("hide"); $("#owner").classList.remove("show"); closePage();
+  addPts(0); switchTab("explore"); render(); setTimeout(()=>{M&&M.resize();fitAll();},150);
+  toast(guest?"Modo visitante: entre para fazer check-in e ganhar pontos":"Bem-vindo"+(mail?", "+mail.split("@")[0]:"")+"!");
+}
+function logout(){
+  $("#owner").classList.remove("show"); closeModal(); closePage(); S.guest=false;
+  $("#inPass").value=""; $("#welcome").classList.add("hide"); $("#login").classList.remove("hide"); renderLogin();
+}
+$("#ptsTop").onclick=()=>{ if(S.guest) showLogin(); else switchTab("perks"); };
+
+/* boas-vindas */
+$("#wGoogle").onclick=()=>{toast("Login com Google simulado");enterDriver("google");};
+$("#wEmail").onclick=()=>{login.role="driver";showLogin();};
+$("#wSkip").onclick=()=>enterDriver("",true);
+$("#wPhone").onclick=()=>{
+  modal(`<button class="x">✕</button><h2>Entrar com celular</h2>
+   <p class="sub" style="margin:8px 0 12px">Enviaremos um código por SMS (simulado).</p>
+   <label class="fld"><span>Número com DDD</span><input id="phNum" inputmode="tel" placeholder="(79) 99999-0000"></label>
+   <button class="btn" id="phSend">Enviar código</button>`);
+  $("#phSend").onclick=()=>{
+    $("#panel").innerHTML=`<button class="x">✕</button><h2>Digite o código</h2>
+     <p class="sub" style="margin:8px 0 12px">Código de teste: <b>1234</b></p>
+     <label class="fld"><span>Código de 4 dígitos</span><input id="phCode" inputmode="numeric" maxlength="4" placeholder="1234"></label>
+     <button class="btn" id="phOk">Confirmar</button>`;
+    $("#panel .x").onclick=closeModal;
+    $("#phOk").onclick=()=>{ if($("#phCode").value.trim()!=="1234"){toast("Código incorreto. Use 1234.");return;} closeModal(); enterDriver("celular"); };
+  };
+};
+
+/* ===================== PAINEL DO DONO ===================== */
+const owner={name:"Conta demo (dados fictícios)",ids:[7,10],
+  stats:{7:{views:312,routes:48,checkins:19,kwh:120},10:{views:204,routes:31,checkins:12,kwh:85}}};
+function enterOwner(){
+  S.role="owner";
+  $("#login").classList.add("hide"); $("#owner").classList.add("show");
+  renderOwner(); toast("Painel do dono · "+owner.name);
+}
+function renderOwner(){
+  $("#ownName").textContent=owner.name;
+  const mine=owner.ids.map(id=>stations.find(s=>s.id===id));
+  const tot=k=>owner.ids.reduce((a,id)=>a+owner.stats[id][k],0);
+  const rev=owner.ids.reduce((a,id)=>a+owner.stats[id].kwh*(stations.find(s=>s.id===id).price||2.2),0);
+  $("#ownBody").innerHTML=`<h2>Visão geral · hoje</h2>
+   <div class="kpis">
+     <div class="kpi"><div class="ki">${ic("eye",16)}</div><b>${tot("views")}</b><span>Visualizações no app</span></div>
+     <div class="kpi"><div class="ki">${ic("route",16)}</div><b>${tot("routes")}</b><span>Rotas iniciadas</span></div>
+     <div class="kpi"><div class="ki">${ic("users",16)}</div><b>${tot("checkins")}</b><span>Check-ins de motoristas</span></div>
+     <div class="kpi"><div class="ki">${ic("coin",16)}</div><b>${money(rev)}</b><span>Receita estimada</span></div>
+   </div>
+   <h2 style="margin-top:6px">Meus postos</h2>
+   ${mine.map(s=>`<div class="card" style="cursor:default;margin-top:10px" data-o="${s.id}">
+     <div class="row sp"><h3>${s.name}</h3><span class="badge b-${s.status}">${STAT[s.status]}</span></div>
+     <div class="sub">${s.addr}</div>
+     <div class="fresh ${fc(s.age)}"><span class="dot" style="background:${fcolor(s.age)}"></span>Atualizado ${age(s.age)} · fonte: ${s.src} · ${s.conf} confirmações de motoristas</div>
+     ${s.src==="Usuários"&&s.status!=="available"?`<div class="alert">⚠ Motoristas indicam que o posto está <b>${STAT[s.status].toLowerCase()}</b>. Confirme ou corrija o status abaixo.</div>`:""}
+     <div class="lbl">Status oficial</div>
+     <div class="choice">
+       <button data-act="st" data-v="available" style="${s.status==="available"?"border-color:var(--green)":""}">🟢 Livre</button>
+       <button data-act="st" data-v="occupied" style="${s.status==="occupied"?"border-color:var(--red)":""}">🔴 Ocupado</button>
+       <button data-act="st" data-v="offline" style="${s.status==="offline"?"border-color:var(--gray)":""}">⚫ Fora do ar</button>
+     </div>
+     <div class="lbl">Preço por kWh</div>
+     <div class="stepper"><button data-act="pm">−</button><b>${s.price==null?"A definir":money(s.price)}</b><button data-act="pp">+</button></div>
+     <div class="lbl">Vagas livres (${s.free} de ${s.total})</div>
+     <div class="stepper"><button data-act="fm">−</button><b>${s.free}</b><button data-act="fp">+</button></div>
+     <div class="lbl">Oferta para quem carrega aqui</div>
+     <input class="owner-in" data-perk placeholder="Ex.: 10% off no café" value="${s.perk?s.perk.txt:""}">
+     <button class="btn sm sec" data-act="perk" style="margin-top:8px">Salvar oferta</button>
+     <div class="lbl">Desempenho hoje</div>
+     <div class="sub">${owner.stats[s.id].views} visualizações · ${owner.stats[s.id].routes} rotas · ${owner.stats[s.id].checkins} check-ins · ${owner.stats[s.id].kwh} kWh vendidos</div>
+   </div>`).join("")}
+   <button class="btn ghost" id="addSt" style="margin:4px 0 20px">+ Cadastrar novo posto</button>`;
+}
+$("#ownBody").addEventListener("click",e=>{
+  if(e.target.id==="addSt"){toast("Em breve: cadastro de postos (fora do escopo do protótipo)");return;}
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const s=stations.find(x=>x.id===+b.closest("[data-o]").dataset.o), a=b.dataset.act;
+  if(a==="st"){s.status=b.dataset.v;s.age=0;s.src="Operadora";if(s.status==="occupied")s.free=0;else if(s.status==="available"&&s.free===0)s.free=1;toast("Status oficial atualizado");}
+  if(a==="pm")s.price=Math.max(0.5,+((s.price||2.2)-0.1).toFixed(2));
+  if(a==="pp")s.price=+((s.price||2.2)+0.1).toFixed(2);
+  if(a==="fm")s.free=Math.max(0,s.free-1);
+  if(a==="fp")s.free=Math.min(s.total,s.free+1);
+  if(a==="perk"){const v=b.closest("[data-o]").querySelector("[data-perk]").value.trim();
+    s.perk=v?{partner:owner.name,txt:v}:null;toast(v?"Oferta publicada para os motoristas":"Oferta removida");}
+  renderOwner();
+});
+$("#ownOut").onclick=logout;
+$("#ownPreview").onclick=()=>{ $("#owner").classList.remove("show"); S.role="driver"; switchTab("explore"); render();
+  toast("Visualizando como motorista · volte pelo botão Sair em Meu carro"); };
+
+boot();
+</script>
+</body>
+</html>
