@@ -1,0 +1,33 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #0b2a22; color: #f3f8f4; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #hook-stage { position: absolute; inset: 0; }
+    #hook-l1 { position: absolute; left: 0; right: 0; top: 215px; text-align: center; font: 600 88px/1.1 'Outfit', sans-serif; }
+    #hook-pins { position: absolute; left: 0; right: 0; top: 400px; height: 200px; display: flex; justify-content: center; gap: 150px; }
+    .hook-pin { width: 130px; height: 163px; }
+    #hook-l2 { position: absolute; left: 0; right: 0; top: 690px; text-align: center; font: 700 96px/1.1 'Outfit', sans-serif; }
+    #hook-l2 span { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="hook" data-width="1920" data-height="1080">
+    <div id="hook-stage" class="clip" data-start="0" data-duration="6.5">
+      <h1 id="hook-l1">Você chega ao eletroposto.</h1>
+      <div id="hook-pins">
+        <svg id="hook-pin-a" class="hook-pin" viewBox="0 0 40 50"><path d="M20 49S3 31 3 18a17 17 0 0 1 34 0c0 13-17 31-17 31z" fill="#ef4444"/><path d="M13 11l14 14M27 11 13 25" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></svg>
+        <svg id="hook-pin-b" class="hook-pin" viewBox="0 0 40 50"><path d="M20 49S3 31 3 18a17 17 0 0 1 34 0c0 13-17 31-17 31z" fill="#f59e0b"/><path d="M20 8v11l6 4" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg id="hook-pin-c" class="hook-pin" viewBox="0 0 40 50"><path d="M20 49S3 31 3 18a17 17 0 0 1 34 0c0 13-17 31-17 31z" fill="#9ca3af"/><path d="M13 18h14" stroke="#fff" stroke-width="3.6" stroke-linecap="round"/></svg>
+      </div>
+      <p id="hook-l2"><span id="hook-w1" style="color:#ef4444">Ocupado.</span> <span id="hook-w2" style="color:#f59e0b">Quebrado.</span> <span id="hook-w3" style="color:#cbd5d1">Fora do ar.</span></p>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#hook-l1", { y: 36 }, { y: 0, duration: 0.8, ease: "power3.out" }, 0);
+    const pins = ["#hook-pin-a", "#hook-pin-b", "#hook-pin-c"], words = ["#hook-w1", "#hook-w2", "#hook-w3"];
+    pins.forEach((p, i) => {
+      tl.fromTo(p, { opacity: 0, y: 60, scale: 0.4 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(2)" }, 1.4 + i * 0.7);
+      tl.fromTo(words[i], { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 1.5 + i * 0.7);
+    });
+    tl.to("#hook-stage", { opacity: 0, duration: 0.4, ease: "power2.in" }, 6.05);
+    window.__timelines["hook"] = tl;
+  </script>
+</template>

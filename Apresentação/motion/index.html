@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #0b2a22; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="46" data-width="1920" data-height="1080">
+      <div id="hook" data-composition-id="hook" data-composition-src="compositions/hook.html" data-start="0" data-duration="6.5" data-track-index="1" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="solucao" data-composition-id="solucao" data-composition-src="compositions/solucao.html" data-start="6" data-duration="7.5" data-track-index="2" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="produto" data-composition-id="produto" data-composition-src="compositions/produto.html" data-start="13" data-duration="10.5" data-track-index="3" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="banco" data-composition-id="banco" data-composition-src="compositions/banco.html" data-start="23" data-duration="11" data-track-index="4" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="numeros" data-composition-id="numeros" data-composition-src="compositions/numeros.html" data-start="33.5" data-duration="7" data-track-index="5" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+      <div id="final" data-composition-id="final" data-composition-src="compositions/final.html" data-start="40" data-duration="6" data-track-index="6" data-track-kind="graphics" data-width="1920" data-height="1080"></div>
+    </div>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: linear-gradient(135deg, #0b2a22 0%, #06614a 100%); color: #f3f8f4; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #prod-stage { position: absolute; inset: 0; }
+    #prod-eyebrow { position: absolute; left: 160px; top: 150px; font: 600 30px 'Inter', sans-serif; letter-spacing: 0.14em; color: #8af7cb; }
+    #prod-title { position: absolute; left: 160px; top: 205px; width: 900px; font: 700 80px/1.06 'Outfit', sans-serif; }
+    .prod-item { position: absolute; left: 160px; width: 900px; display: flex; gap: 28px; align-items: flex-start; }
+    .prod-n { flex: none; width: 64px; height: 64px; border-radius: 50%; background: #8af7cb; color: #002116; font: 700 36px/64px 'Outfit', sans-serif; text-align: center; }
+    .prod-item h3 { font: 600 46px/1.15 'Outfit', sans-serif; }
+    .prod-item p { font: 400 30px/1.35 'Inter', sans-serif; color: #c4ddd2; margin-top: 6px; }
+    #prod-img { position: absolute; left: 1180px; top: 92px; width: 563px; height: 896px; border-radius: 40px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45); }
+    .prod-ring { position: absolute; border: 5px solid #8af7cb; border-radius: 16px; box-shadow: 0 0 0 6px rgba(138, 247, 203, 0.25); }
+  </style>
+  <div id="root" data-composition-id="produto" data-width="1920" data-height="1080">
+    <div id="prod-stage" class="clip" data-start="0" data-duration="10.5">
+      <p id="prod-eyebrow">O APP</p>
+      <h2 id="prod-title">Tudo o que o motorista precisa, em um mapa.</h2>
+      <div id="prod-i1" class="prod-item" style="top:455px"><div class="prod-n">1</div><div><h3>Status por cor</h3><p>Livre, ocupado ou fora do ar.</p></div></div>
+      <div id="prod-i2" class="prod-item" style="top:625px"><div class="prod-n">2</div><div><h3>Idade da informação</h3><p>Sempre visível, com fonte e confirmações.</p></div></div>
+      <div id="prod-i3" class="prod-item" style="top:795px"><div class="prod-n">3</div><div><h3>Filtro por plugue e potência</h3><p>Só mostra o que serve para o seu carro.</p></div></div>
+      <img id="prod-img" src="assets/app-explorar.png" alt="Tela Explorar do protótipo do MAPERE, com o mapa de Aracaju e a lista de postos" />
+      <div id="prod-r1" class="prod-ring" style="left:1608px;top:377px;width:112px;height:80px"></div>
+      <div id="prod-r2" class="prod-ring" style="left:1220px;top:846px;width:475px;height:60px"></div>
+      <div id="prod-r3" class="prod-ring" style="left:1200px;top:228px;width:530px;height:46px"></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#root", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.6, ease: "power3.inOut" }, 0);
+    tl.fromTo("#prod-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
+    tl.fromTo("#prod-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.6);
+    tl.fromTo("#prod-img", { opacity: 0, x: 120, scale: 0.94 }, { opacity: 1, x: 0, scale: 1, duration: 0.9, ease: "power3.out" }, 0.9);
+    const items = ["#prod-i1", "#prod-i2", "#prod-i3"], rings = ["#prod-r1", "#prod-r2", "#prod-r3"];
+    items.forEach((it, i) => {
+      const t = 2.6 + i * 2.4;
+      tl.fromTo(it, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, t);
+      tl.fromTo(rings[i], { opacity: 0, scale: 1.35 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.8)" }, t + 0.2);
+      if (i < 2) tl.to(rings[i], { opacity: 0.0, duration: 0.4 }, t + 2.1);
+    });
+    tl.to("#prod-stage", { opacity: 0, duration: 0.4, ease: "power2.in" }, 10.05);
+    window.__timelines["produto"] = tl;
+  </script>
+</template>

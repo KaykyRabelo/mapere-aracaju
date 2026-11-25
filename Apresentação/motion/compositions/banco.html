@@ -1,0 +1,40 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #0b2a22; color: #f3f8f4; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #banco-stage { position: absolute; inset: 0; }
+    #banco-eyebrow { position: absolute; left: 160px; top: 70px; font: 600 28px 'Inter', sans-serif; letter-spacing: 0.14em; color: #8af7cb; }
+    #banco-title { position: absolute; left: 160px; top: 108px; font: 700 52px/1.1 'Outfit', sans-serif; }
+    .banco-label { position: absolute; right: 160px; top: 96px; font: 600 34px 'Outfit', sans-serif; color: #0b2a22; background: #8af7cb; border-radius: 99px; padding: 10px 28px; }
+    .banco-card { position: absolute; background: #ffffff; border-radius: 24px; padding: 14px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45); }
+    .banco-card img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    #banco-c1 { left: 310px; top: 195px; width: 1300px; height: 770px; }
+    #banco-c2 { left: 180px; top: 215px; width: 1560px; height: 730px; }
+  </style>
+  <div id="root" data-composition-id="banco" data-width="1920" data-height="1080">
+    <div id="banco-stage" class="clip" data-start="0" data-duration="11">
+      <p id="banco-eyebrow">POR TRÁS DO APP</p>
+      <h2 id="banco-title">Um banco de dados PostgreSQL</h2>
+      <p id="banco-l1" class="banco-label">Modelo conceitual</p>
+      <p id="banco-l2" class="banco-label">Modelo lógico · 18 tabelas</p>
+      <div id="banco-c1" class="banco-card"><img src="assets/conceitual.png" alt="Diagrama conceitual do MAPERE feito no BRModelo" /></div>
+      <div id="banco-c2" class="banco-card"><img src="assets/logico.png" alt="Modelo lógico do MAPERE feito no BRModelo, com as 18 tabelas" /></div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#root", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.6, ease: "power3.inOut" }, 0);
+    tl.fromTo("#banco-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
+    tl.fromTo("#banco-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.6);
+    tl.fromTo("#banco-l1", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 1.0);
+    tl.fromTo("#banco-c1", { opacity: 0, y: 80, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power3.out" }, 1.0);
+    tl.to("#banco-c1", { scale: 1.03, duration: 3.5, ease: "none" }, 2.0);
+    // troca para o modelo lógico
+    tl.to("#banco-c1", { opacity: 0, x: -120, duration: 0.5, ease: "power2.in" }, 5.4);
+    tl.to("#banco-l1", { opacity: 0, duration: 0.3 }, 5.4);
+    tl.fromTo("#banco-l2", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 5.8);
+    tl.fromTo("#banco-c2", { opacity: 0, x: 120 }, { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }, 5.8);
+    tl.to("#banco-c2", { scale: 1.02, duration: 4, ease: "none" }, 6.7);
+    tl.to("#banco-stage", { opacity: 0, duration: 0.4, ease: "power2.in" }, 10.55);
+    window.__timelines["banco"] = tl;
+  </script>
+</template>

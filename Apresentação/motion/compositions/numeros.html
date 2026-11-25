@@ -1,0 +1,38 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #06614a; color: #f3f8f4; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #num-stage { position: absolute; inset: 0; }
+    #num-eyebrow { position: absolute; left: 160px; top: 190px; font: 600 30px 'Inter', sans-serif; letter-spacing: 0.14em; color: #8af7cb; }
+    #num-title { position: absolute; left: 160px; top: 245px; font: 700 84px/1.06 'Outfit', sans-serif; }
+    .num-box { position: absolute; top: 470px; width: 360px; border-top: 5px solid #8af7cb; padding-top: 24px; }
+    .num-big { font: 700 190px/1 'Outfit', sans-serif; color: #8af7cb; }
+    .num-lab { font: 400 34px/1.35 'Inter', sans-serif; color: #d7efe5; margin-top: 18px; }
+    #num-foot { position: absolute; left: 160px; top: 930px; font: 400 28px 'Inter', sans-serif; color: #b9dccd; }
+  </style>
+  <div id="root" data-composition-id="numeros" data-width="1920" data-height="1080">
+    <div id="num-stage" class="clip" data-start="0" data-duration="7">
+      <p id="num-eyebrow">O BANCO EM NÚMEROS</p>
+      <h2 id="num-title">Pronto para crescer com o app.</h2>
+      <div id="num-b1" class="num-box" style="left:160px"><p class="num-big" id="num-n1">0</p><p class="num-lab">tabelas, todas com chaves e restrições</p></div>
+      <div id="num-b2" class="num-box" style="left:600px"><p class="num-big" id="num-n2">0</p><p class="num-lab">eletropostos reais de Aracaju</p></div>
+      <div id="num-b3" class="num-box" style="left:1040px"><p class="num-big" id="num-n3">0</p><p class="num-lab">vínculos entre postos e plugues</p></div>
+      <div id="num-b4" class="num-box" style="left:1480px"><p class="num-big" id="num-n4">0</p><p class="num-lab">testes em que a regra barra o dado errado</p></div>
+      <p id="num-foot">Postos reais de Aracaju. Status e usuários simulados.</p>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#root", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.6, ease: "power3.inOut" }, 0);
+    tl.fromTo("#num-eyebrow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.5);
+    tl.fromTo("#num-title", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 0.6);
+    const targets = [18, 47, 59, 8];
+    targets.forEach((v, i) => {
+      const t = 1.4 + i * 0.5, obj = { n: 0 }, el = document.getElementById("num-n" + (i + 1));
+      tl.fromTo("#num-b" + (i + 1), { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, t);
+      tl.fromTo(obj, { n: 0 }, { n: v, duration: 1.4, ease: "power2.out", onUpdate: () => { el.textContent = String(Math.round(obj.n)); } }, t);
+    });
+    tl.fromTo("#num-foot", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 3.0);
+    tl.to("#num-stage", { opacity: 0, duration: 0.4, ease: "power2.in" }, 6.55);
+    window.__timelines["numeros"] = tl;
+  </script>
+</template>

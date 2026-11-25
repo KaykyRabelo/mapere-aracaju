@@ -1,0 +1,31 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; background: #0b2a22; color: #f3f8f4; font-family: 'Inter', sans-serif; overflow: hidden; }
+    #fim-stage { position: absolute; inset: 0; }
+    #fim-lockup { position: absolute; left: 0; right: 0; top: 330px; height: 240px; display: flex; justify-content: center; align-items: center; gap: 36px; }
+    #fim-logo { width: 197px; height: 240px; }
+    #fim-word { font: 700 190px/1 'Outfit', sans-serif; letter-spacing: 0.02em; }
+    #fim-sub { position: absolute; left: 0; right: 0; top: 640px; text-align: center; font: 500 44px 'Inter', sans-serif; color: #c4ddd2; }
+    #fim-url { position: absolute; left: 0; right: 0; top: 760px; text-align: center; }
+    #fim-url span { display: inline-block; font: 600 42px 'Inter', sans-serif; color: #002116; background: #8af7cb; border-radius: 99px; padding: 16px 44px; }
+  </style>
+  <div id="root" data-composition-id="final" data-width="1920" data-height="1080">
+    <div id="fim-stage" class="clip" data-start="0" data-duration="6">
+      <div id="fim-lockup">
+        <svg id="fim-logo" viewBox="0 0 48 58" aria-label="Logo do MAPERE"><path d="M24 57S3 36 3 21a21 21 0 0 1 42 0c0 15-21 36-21 36z" fill="#8af7cb"/><path d="M26.5 9 14 28h9l-2 14 13-20h-9z" fill="#0b2a22"/></svg>
+        <p id="fim-word">MAPERE</p>
+      </div>
+      <p id="fim-sub">Banco de dados · PostgreSQL · Supabase · BRModelo</p>
+      <p id="fim-url"><span>mapere-aracaju.vercel.app</span></p>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#root", { clipPath: "inset(0 0 0 100%)" }, { clipPath: "inset(0 0 0 0%)", duration: 0.6, ease: "power3.inOut" }, 0);
+    tl.fromTo("#fim-logo", { opacity: 0, y: 80, scale: 0.5 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "back.out(1.8)" }, 0.6);
+    tl.fromTo("#fim-word", { opacity: 0, x: -60 }, { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" }, 1.0);
+    tl.fromTo("#fim-sub", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 1.8);
+    tl.fromTo("#fim-url", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, 2.4);
+    window.__timelines["final"] = tl;
+  </script>
+</template>
