@@ -1,6 +1,10 @@
 # Diagrama Conceitual (DER) do MAPERE
 
-Mostra só as entidades e como elas se relacionam, sem colunas. O diagrama abaixo aparece desenhado direto no GitHub.
+Feito no [BRModelo Web](https://www.brmodeloweb.com/). Link público do modelo: https://app.brmodeloweb.com/publicview/6b0731c11448006b56802e27
+
+![Diagrama conceitual do MAPERE no BRModelo](diagrama-conceitual-brmodelo.png)
+
+O desenho do BRModelo mostra as entidades principais, os relacionamentos com cardinalidade e os atributos mais importantes de cada entidade (a bolinha preenchida é a chave). O diagrama em Mermaid abaixo mostra só as entidades e as relações, sem colunas, e aparece desenhado direto no GitHub.
 
 ```mermaid
 erDiagram
@@ -47,5 +51,3 @@ erDiagram
 - Um usuário avalia vários postos e um posto recebe várias avaliações (1:N dos dois lados, com a avaliação como entidade).
 - Favoritos, alertas de liberação e resgates de cupom são relações N:N entre usuário e posto (ou cupom).
 - Um posto pode ter no máximo um dono, e um dono pode ter vários postos.
-
-> **Para entregar à professora:** refaça este diagrama no BRModelo (modelo conceitual), tire o print e salve nesta pasta. O arquivo `.md` serve de guia.

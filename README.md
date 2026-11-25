@@ -65,7 +65,8 @@ O banco tem **18 tabelas**: `conector_tipo`, `carro_modelo`, `carro_modelo_conec
 ## Links
 
 - **Supabase (link público):** _colar aqui o link do projeto_
-- **BRModelo (link público):** _colar aqui o link do modelo_
+- **BRModelo, modelo conceitual (link público):** https://app.brmodeloweb.com/publicview/6b0731c11448006b56802e27
+- **BRModelo, modelo lógico (link público):** https://app.brmodeloweb.com/publicview/6b072f7a1448006b56802c9f
 - **Protótipo:** https://mapere-aracaju.vercel.app
 
 ## Squad

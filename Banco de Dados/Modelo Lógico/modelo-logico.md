@@ -1,6 +1,10 @@
 # Modelo Lógico do MAPERE
 
-Tabelas, colunas, chaves primárias (PK) e estrangeiras (FK). Os nomes batem com o script `Tabelas/01_create_tables.sql`. O diagrama aparece desenhado direto no GitHub.
+Feito no [BRModelo Web](https://www.brmodeloweb.com/). Link público do modelo: https://app.brmodeloweb.com/publicview/6b072f7a1448006b56802c9f
+
+![Modelo lógico do MAPERE no BRModelo](modelo-logico-brmodelo.png)
+
+Tabelas, colunas, chaves primárias (PK) e estrangeiras (FK). Os nomes batem com o script `Tabelas/01_create_tables.sql`. O diagrama em Mermaid abaixo mostra o mesmo modelo e aparece desenhado direto no GitHub.
 
 ```mermaid
 erDiagram
@@ -176,5 +180,3 @@ erDiagram
 ## Normalização
 
 Todas as tabelas estão na 3ª forma normal: valores atômicos, nenhuma coluna depende de parte de uma chave composta, e nenhuma coluna não-chave depende de outra não-chave. Dados que se repetem (plugues, parceiros, etiquetas) ficam em tabelas próprias.
-
-> **Para entregar à professora:** refaça este diagrama no BRModelo (modelo lógico), tire o print e salve nesta pasta. O arquivo `.md` serve de guia.
